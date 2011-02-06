@@ -18,6 +18,7 @@ function onEnable() {
 function onDisable() { plugin.log(Level.INFO, "ExampleScript unloaded!"); }
 function onCommand(sender, command, commandLabel, args) { return false; }
 
+/* N.B. Above onCommand may become plugin.registerCommand(...) */
 /* N.B. At the moment, there is no way to use the above way to handle commands. */
 /* Handle PLAYER_COMMAND event instead */
 /* Here is how you handle Events */
