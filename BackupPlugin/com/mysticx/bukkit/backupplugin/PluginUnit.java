@@ -5,6 +5,7 @@ import org.bukkit.Server;
 import org.bukkit.craftbukkit.CraftServer;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Observable;
@@ -50,8 +51,11 @@ public abstract class PluginUnit extends Observable implements Runnable {
         this.work_path = workdir;
 
         try {
-            this.console = (MinecraftServer) CraftServer.class.getDeclaredField("console").get(etc);
+            Field cField = CraftServer.class.getDeclaredField("console");
+            cField.setAccessible(true);
+            this.console = (MinecraftServer) cField.get(etc);
         } catch (Throwable e) {
+            e.printStackTrace();
             MessageHandler.log(Level.SEVERE, "Not running on CraftBukkit/Notchian Server!!");
         }
     }
@@ -73,8 +77,11 @@ public abstract class PluginUnit extends Observable implements Runnable {
         this.work_path = workdir;
 
         try {
-            this.console = (MinecraftServer) CraftServer.class.getDeclaredField("console").get(etc);
+            Field cField = CraftServer.class.getDeclaredField("console");
+            cField.setAccessible(true);
+            this.console = (MinecraftServer) cField.get(etc);
         } catch (Throwable e) {
+            e.printStackTrace();
             MessageHandler.log(Level.SEVERE, "Not running on CraftBukkit/Notchian Server!!");
         }
     }
@@ -157,8 +164,7 @@ public abstract class PluginUnit extends Observable implements Runnable {
      */
     public void setEnabled(boolean bool) {
         this.isEnabled = bool;
-        if (bool)
-            notifyAll();
+        if (bool) notifyAll();
     }
 
     /**

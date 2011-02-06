@@ -14,6 +14,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -80,8 +81,12 @@ public class BackupPlugin extends JavaPlugin implements Observer {
 
         try {
             //
-            ((MinecraftServer) (CraftServer.class.getDeclaredField("console").get(this.getServer()))).console.isPlayer();
+            Field cField = CraftServer.class.getDeclaredField("console");
+            cField.setAccessible(true);
+            ((MinecraftServer) (cField.get(this.getServer()))).console.isPlayer();
+
         } catch (Throwable e) {
+            e.printStackTrace();
             MessageHandler.log(Level.SEVERE, "Not running on CraftBukkit/Notchian Server! Unloading self.");
             getServer().getPluginManager().disablePlugin(this);
             return;

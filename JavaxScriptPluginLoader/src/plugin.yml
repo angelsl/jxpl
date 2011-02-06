@@ -1,0 +1,3 @@
+name: 'JavaxScriptPluginLoader'
+main: 'org.angelsl.bukkit.javaxscriptloader.ScriptLoaderPlugin'
+version: '0.0.1'
