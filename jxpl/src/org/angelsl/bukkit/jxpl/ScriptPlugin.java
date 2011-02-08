@@ -1,4 +1,4 @@
-package org.angelsl.bukkit.javaxscriptloader;
+package org.angelsl.bukkit.jxpl;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -12,7 +12,6 @@ import org.bukkit.util.config.Configuration;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -27,7 +26,7 @@ import java.util.logging.Logger;
  */
 public class ScriptPlugin implements Plugin, Listener {
 
-    static Logger l = Logger.getLogger("Minecraft.ScriptLoaderPlugin");
+    static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 
     private boolean isEnabled = false;
     private final PluginLoader loader;
@@ -36,7 +35,6 @@ public class ScriptPlugin implements Plugin, Listener {
     private final PluginDescriptionFile description;
     private final File dataFolder;
     private Invocable sEngine;
-    private final Configuration config;
     private final HashMap<Event.Type, String> eventHandlers = new HashMap<Event.Type, String>();
 
 
@@ -48,8 +46,6 @@ public class ScriptPlugin implements Plugin, Listener {
         dataFolder = folder;
         engine.put("plugin", this);
         sEngine = (Invocable)engine;
-        config = new Configuration(new File(dataFolder, "config.yml"));
-        config.load();
     }
 
     @Override
@@ -64,7 +60,7 @@ public class ScriptPlugin implements Plugin, Listener {
 
     @Override
     public Configuration getConfiguration() {
-        return config;
+        throw new RuntimeException("Script plugins do not have separate configuration files");
     }
 
     @Override
@@ -106,8 +102,7 @@ public class ScriptPlugin implements Plugin, Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        if(!isEnabled) return false;
-        return (Boolean) tryInvoke("onCommand", sender, command, commandLabel, args);
+        return false;
     }
 
     public void handleEvent(Event.Type type, Event args)

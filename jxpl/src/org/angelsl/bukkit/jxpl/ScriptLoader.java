@@ -1,11 +1,9 @@
-package org.angelsl.bukkit.javaxscriptloader;
+package org.angelsl.bukkit.jxpl;
 
 import org.bukkit.Server;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.event.vehicle.VehicleListener;
 import org.bukkit.plugin.*;
 
 import javax.script.*;
@@ -26,7 +24,7 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class ScriptLoader implements PluginLoader {
-    static Logger l = Logger.getLogger("Minecraft.ScriptLoaderPlugin");
+    static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 
     private final Server instance;
     private Pattern[] fileFilters;
@@ -52,7 +50,7 @@ public class ScriptLoader implements PluginLoader {
     }
 
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
-        if (!file.getParentFile().equals(ScriptLoaderPlugin.getScriptsDir())) return null;
+        if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
         ScriptEngine se = manager.getEngineByExtension(file.getName().substring(file.getName().lastIndexOf(".") + 1));
         {
             FileInputStream is = null;
@@ -81,7 +79,7 @@ public class ScriptLoader implements PluginLoader {
         ScriptPlugin sp = new ScriptPlugin(this, instance,
                 new PluginDescriptionFile((String)se.get("scriptName"), (String)se.get("scriptVersion"), "NOT APPLICABLE YOU BUKKIT RETARDS"),
                 getDataFolder(file), file, se);
-        ScriptLoaderPlugin.getLoadedPlugins().add(sp);
+        JxplPlugin.getLoadedPlugins().add(sp);
         l.log(Level.INFO, "Loaded script " + file.getName());
         return sp;
     }
