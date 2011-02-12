@@ -3,19 +3,19 @@ from java.util.logging import Level
 
 scriptName = "PyExampleScript"
 scriptVersion = "1"
+HELPER_VARIABLE_NAME = "helper"
+PLUGIN_VARIABLE_NAME = "plugin"
+SERVER_VARIABLE_NAME = "server"
 
 def onEnable():
-    plugin.log(Level.INFO, "PyExampleScript loaded!")
-    plugin.registerEvent(Event.Type.PLAYER_JOIN, Event.Priority.Lowest, "onPlayerJoin")
+    helper.log(Level.INFO, "PyExampleScript loaded!")
+    helper.registerEvent(Event.Type.PLAYER_JOIN, Event.Priority.Lowest, "onPlayerJoin")
 
 def onDisable():
-    plugin.log(Level.INFO, "PyExampleScript unloaded!")
-
-def onCommand(sender, command, label, args):
-    return False
+    helper.log(Level.INFO, "PyExampleScript unloaded!")
 
 def onPlayerJoin(type, args):
-    plugin.getServer().broadcastMessage("PyExampleScript says hi, " + args.getPlayer().getName())
+    server.broadcastMessage("PyExampleScript says hi, " + args.getPlayer().getName())
 
 
    

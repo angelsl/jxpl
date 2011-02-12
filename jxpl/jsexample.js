@@ -5,18 +5,22 @@ importPackage(java.util.logging);
  */
 scriptName = "JsExampleScript";
 scriptVersion = "1";
+// New: change the variable name for the 3 preset variables.
+// If not specified, the values below are used as default.
+HELPER_VARIABLE_NAME = "helper"
+PLUGIN_VARIABLE_NAME = "plugin"
+SERVER_VARIABLE_NAME = "server"
 
 /* Here is the onEnable, onDisable, and onCommand functions.
  * These aren't required, but then exceptions would occur when they are called.
  */
 function onEnable() { 
-    plugin.log(Level.INFO, "JsExampleScript loaded!"); 
+    helper.log(Level.INFO, "JsExampleScript loaded!"); 
     /* And here is how you register/handle events. */
-    plugin.registerEvent(Event.Type.PLAYER_JOIN, Event.Priority.Lowest, "onPlayerJoin");
+    helper.registerEvent(Event.Type.PLAYER_JOIN, Event.Priority.Lowest, "onPlayerJoin");
     /* And so on. Refer to Bukkit docs for event types and priorities */
 }
-function onDisable() { plugin.log(Level.INFO, "ExampleScript unloaded!"); }
-function onCommand(sender, command, commandLabel, args) { return false; }
+function onDisable() { helper.log(Level.INFO, "ExampleScript unloaded!"); }
 
 /* N.B. Above onCommand may become plugin.registerCommand(...) */
 /* N.B. At the moment, there is no way to use the above way to handle commands. */
@@ -25,8 +29,8 @@ function onCommand(sender, command, commandLabel, args) { return false; }
 /* Note that method names are case-sensitive */
 function onPlayerJoin(type, eventArgs)
 {
-    plugin.getServer().broadcastMessage("JsExampleScript says hi, " + eventArgs.getPlayer().getName());
+    server.broadcastMessage("JsExampleScript says hi, " + eventArgs.getPlayer().getName());
 }
 /* Final remarks:
- * Never try to access 'plugin' outside a method! 'plugin' is only defined immediately before enable is called.
+ * Never try to access helper, plugin or server outside a function! They are only defined immediately before enable is called, so if you try to access them, your script will not load.
  */
