@@ -12,7 +12,9 @@ import org.bukkit.util.config.Configuration;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,10 +40,9 @@ public class ScriptPlugin implements Plugin, Listener {
     private PluginHelper helper;
     private final HashMap<Event.Type, String> eventHandlers = new HashMap<Event.Type, String>();
 
-    private static String getOrDefault(ScriptEngine e, String vname, String efault)
-    {
+    private static String getOrDefault(ScriptEngine e, String vname, String efault) {
         Object r = e.get(vname);
-        return r == null || !(r instanceof String) ? efault : (String)r;
+        return r == null || !(r instanceof String) ? efault : (String) r;
     }
 
     public ScriptPlugin(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ScriptEngine engine) {
@@ -127,8 +128,9 @@ public class ScriptPlugin implements Plugin, Listener {
     private class PluginHelper {
         /**
          * Register an event, specifying the function that should handle the event
-         * @param event The type of the event that will trigger the function
-         * @param priority The priority of the event handler
+         *
+         * @param event        The type of the event that will trigger the function
+         * @param priority     The priority of the event handler
          * @param functionName The name of the function that will handle the event
          */
         @SuppressWarnings("unused")
@@ -139,7 +141,8 @@ public class ScriptPlugin implements Plugin, Listener {
 
         /**
          * Logs a message.
-         * @param l The level of the message
+         *
+         * @param l       The level of the message
          * @param message The message to be logged
          */
         @SuppressWarnings("unused")
@@ -148,15 +151,72 @@ public class ScriptPlugin implements Plugin, Listener {
         }
 
         /**
-         * Includes a script located in the script's data directory
+         * Includes a script, with a path either absolute, or relative to Bukkit's current working directory (should be the root directory)
+         *
          * @param s The file name of the script to include
          * @return true if the script has been included; false if something bad happened
          */
         @SuppressWarnings("unused")
-        public boolean includeScript(String s)
-        {
-            // TODO
-            return false;
+        public boolean includeScript(String s) {
+            return includeScript(new File(s));
+        }
+
+        /**
+         * Includes a script.
+         *
+         * @param f The file describing the script file to be included
+         * @return true if the script has been included; false if something bad happened
+         */
+        public boolean includeScript(File f) {
+            String toEval = getFileContents(f);
+            if (toEval == null || toEval.isEmpty()) return false;
+            try {
+                ((ScriptEngine) ScriptPlugin.this.sEngine).eval(toEval);
+                return true;
+            } catch (Throwable t) {
+                return false;
+            }
+        }
+
+        /**
+         * Gets the contents of a file.
+         *
+         * @param path The path of the file, either absolute, or relative to Bukkit's CWD
+         * @return The file's contents, or "" if an error occured or the file does not exist.
+         */
+        public String getFileContents(String path) {
+            return getFileContents(new File(path));
+        }
+
+        /**
+         * Gets the contents of a file.
+         *
+         * @param file The file describing the file whose contents are to be read
+         * @return The file's contents, or "" if an error occured or the file does not exist.
+         */
+        public String getFileContents(File file) {
+            StringBuffer sb = new StringBuffer(1024);
+            FileReader fr = null;
+            BufferedReader reader = null;
+            try {
+                fr = new FileReader(file);
+                reader = new BufferedReader(fr);
+                char[] chars = new char[1024];
+                int numRead = 0;
+                while ((numRead = reader.read(chars)) > -1) {
+                    sb.append(String.valueOf(chars));
+                }
+                reader.close();
+            } catch (Throwable e) {
+            } finally {
+                try {
+                    fr.close();
+                    reader.close();
+
+                } catch (Throwable e) {
+                }
+            }
+            return sb.toString();
         }
     }
 }
