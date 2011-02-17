@@ -157,7 +157,7 @@ public class ScriptPlugin implements Plugin, Listener {
          * @return true if the script has been included; false if something bad happened
          */
         @SuppressWarnings("unused")
-        public boolean includeScript(String s) {
+        public Object includeScript(String s) {
             return includeScript(new File(s));
         }
 
@@ -167,15 +167,20 @@ public class ScriptPlugin implements Plugin, Listener {
          * @param f The file describing the script file to be included
          * @return true if the script has been included; false if something bad happened
          */
-        public boolean includeScript(File f) {
-            String toEval = getFileContents(f);
-            if (toEval == null || toEval.isEmpty()) return false;
-            try {
-                ((ScriptEngine) ScriptPlugin.this.sEngine).eval(toEval);
-                return true;
-            } catch (Throwable t) {
-                return false;
-            }
+        public Object includeScript(File f) {
+    		Object result = null;
+        	try {
+        		FileReader fr = new FileReader(f);
+        		try {
+        			result = ((ScriptEngine) ScriptPlugin.this.sEngine).eval(fr);
+        			fr.close();
+        		} catch(Throwable t) {
+        			l.log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
+        		}
+        	} catch (Throwable t) {
+        		l.log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
+        	}
+			return result;
         }
 
         /**
