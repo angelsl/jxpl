@@ -154,7 +154,7 @@ public class ScriptPlugin implements Plugin, Listener {
          * Includes a script, with a path either absolute, or relative to Bukkit's current working directory (should be the root directory)
          *
          * @param s The file name of the script to include
-         * @return Object result of eval if successful, null otherwise
+         * @return result Object of eval if successful, null otherwise
          */
         @SuppressWarnings("unused")
         public Object includeScript(String s) {
@@ -165,7 +165,7 @@ public class ScriptPlugin implements Plugin, Listener {
          * Includes a script.
          *
          * @param f The file describing the script file to be included
-         * @return Object result of eval if successful, null otherwise
+         * @return result Object of eval if successful, null otherwise
          */
         public Object includeScript(File f) {
     		Object result = null;
@@ -173,10 +173,10 @@ public class ScriptPlugin implements Plugin, Listener {
         		FileReader fr = new FileReader(f);
         		try {
         			result = ((ScriptEngine) ScriptPlugin.this.sEngine).eval(fr);
-        			fr.close();
         		} catch(Throwable t) {
         			l.log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
         		}
+        		fr.close();
         	} catch (Throwable t) {
         		l.log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
         	}
