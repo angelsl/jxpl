@@ -27,10 +27,6 @@ public final class JxplPlugin extends JavaPlugin {
         return loadedPlugins;
     }
 
-    public JxplPlugin(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-    }
-
     public void onDisable() {
         for (ScriptPlugin sp : loadedPlugins) {
             getServer().getPluginManager().disablePlugin(sp);
