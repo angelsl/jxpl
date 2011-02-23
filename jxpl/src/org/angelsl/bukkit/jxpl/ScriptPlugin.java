@@ -125,7 +125,7 @@ public class ScriptPlugin implements Plugin, Listener {
         return sEngine;
     }
 
-    private class PluginHelper {
+    public class PluginHelper {
         /**
          * Register an event, specifying the function that should handle the event
          *
