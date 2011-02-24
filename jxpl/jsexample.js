@@ -11,7 +11,7 @@ HELPER_VARIABLE_NAME = "helper"
 PLUGIN_VARIABLE_NAME = "plugin"
 SERVER_VARIABLE_NAME = "server"
 
-/* Here is the onEnable, onDisable, and onCommand functions.
+/* Here are the onEnable and onDisable functions.
  * These aren't required, but then exceptions would occur when they are called.
  */
 function onEnable() { 
@@ -22,9 +22,6 @@ function onEnable() {
 }
 function onDisable() { helper.log(Level.INFO, "ExampleScript unloaded!"); }
 
-/* N.B. Above onCommand may become plugin.registerCommand(...) */
-/* N.B. At the moment, there is no way to use the above way to handle commands. */
-/* Handle PLAYER_COMMAND event instead */
 /* Here is how you handle Events */
 /* Note that method names are case-sensitive */
 function onPlayerJoin(type, eventArgs)

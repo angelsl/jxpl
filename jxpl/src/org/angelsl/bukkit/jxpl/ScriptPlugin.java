@@ -182,7 +182,7 @@ public class ScriptPlugin implements Plugin, Listener {
          * Gets the contents of a file.
          *
          * @param path The path of the file, either absolute, or relative to Bukkit's CWD
-         * @return The file's contents, or "" if an error occured or the file does not exist.
+         * @return The file's contents, or null if an error occured, or the file does not exist.
          */
         public String getFileContents(String path) {
             return getFileContents(new File(path));
@@ -192,7 +192,7 @@ public class ScriptPlugin implements Plugin, Listener {
          * Gets the contents of a file.
          *
          * @param file The file describing the file whose contents are to be read
-         * @return The file's contents, or "" if an error occured or the file does not exist.
+         * @return The file's contents, or null if an error occured, or the file does not exist.
          */
         public String getFileContents(File file) {
             StringBuffer sb = new StringBuffer(1024);
@@ -206,8 +206,8 @@ public class ScriptPlugin implements Plugin, Listener {
                 while ((numRead = reader.read(chars)) > -1) {
                     sb.append(String.valueOf(chars));
                 }
-                reader.close();
             } catch (Throwable e) {
+                return null;
             } finally {
                 try {
                     fr.close();
