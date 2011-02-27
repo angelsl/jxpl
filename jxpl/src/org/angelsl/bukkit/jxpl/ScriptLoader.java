@@ -16,13 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-/**
- * Created by IntelliJ IDEA.
- * User: angelsl
- * Date: 2/6/11
- * Time: 2:50 PM
- * To change this template use File | Settings | File Templates.
- */
 public class ScriptLoader implements PluginLoader {
     static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 

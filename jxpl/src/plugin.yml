@@ -1,3 +1,9 @@
 name: 'JavaxScriptPluginLoader'
 main: 'org.angelsl.bukkit.jxpl.JxplPlugin'
 version: '2'
+
+commands:
+  jxpl:
+    aliases: [script, js]
+    description: Jxpl script commands.
+    usage: "Usage: /<command> scriptName (arguments)"

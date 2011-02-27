@@ -19,13 +19,6 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Created by IntelliJ IDEA.
- * User: angelsl
- * Date: 2/6/11
- * Time: 3:01 PM
- * To change this template use File | Settings | File Templates.
- */
 public class ScriptPlugin implements Plugin, Listener {
 
     static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
@@ -102,7 +95,8 @@ public class ScriptPlugin implements Plugin, Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        return false;
+    	tryInvoke("onCommand", sender, command, commandLabel, args);
+    	return true;
     }
 
     public void onEvent(Event.Type type, Event args) {
