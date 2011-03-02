@@ -111,7 +111,8 @@ public class ScriptLoader implements PluginLoader {
     public EventExecutor createExecutor(final Event.Type type, Listener listener) {
         return new EventExecutor() {
                     public void execute(Listener listener, Event event) {
-                        ((ScriptPlugin)listener).onEvent(type, event);
+                        //((ScriptPlugin)listener).onEvent(type, event);
+                        ((ScriptPlugin.ScriptEventListener)listener).onEvent(type, event);
                     }
                 };
     }

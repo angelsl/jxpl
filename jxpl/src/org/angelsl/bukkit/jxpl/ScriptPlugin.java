@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * Time: 3:01 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ScriptPlugin implements Plugin, Listener {
+public class ScriptPlugin implements Plugin/*, Listener*/ {
 
     static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 
@@ -38,7 +38,7 @@ public class ScriptPlugin implements Plugin, Listener {
     private final File dataFolder;
     private Invocable sEngine;
     private PluginHelper helper;
-    private final HashMap<Event.Type, String> eventHandlers = new HashMap<Event.Type, String>();
+    //private final HashMap<Event.Type, String> eventHandlers = new HashMap<Event.Type, String>();
 
     private static String getOrDefault(ScriptEngine e, String vname, String efault) {
         Object r = e.get(vname);
@@ -105,11 +105,11 @@ public class ScriptPlugin implements Plugin, Listener {
         return false;
     }
 
-    public void onEvent(Event.Type type, Event args) {
+    /*public void onEvent(Event.Type type, Event args) {
         if (isEnabled && eventHandlers.containsKey(type)) {
             tryInvoke(eventHandlers.get(type), type, args);
         }
-    }
+    }*/
 
     private Object tryInvoke(String funcName, Object... params) {
         try {
@@ -124,6 +124,22 @@ public class ScriptPlugin implements Plugin, Listener {
     public Invocable getScriptEngine() {
         return sEngine;
     }
+    
+    public class ScriptEventListener implements Listener {
+    	private String callback;
+    	private ScriptPlugin plugin;
+    	
+    	public ScriptEventListener(ScriptPlugin sp, String fn) {
+    		plugin = sp;
+    		callback = fn;
+    	}
+    	
+    	public void onEvent(Event.Type type, Event args) {
+    		if (plugin.isEnabled) {
+    			plugin.tryInvoke(callback, type, args);
+    		}
+    	}
+    }
 
     public class PluginHelper {
         /**
@@ -135,8 +151,9 @@ public class ScriptPlugin implements Plugin, Listener {
          */
         @SuppressWarnings("unused")
         public void registerEvent(Event.Type event, Event.Priority priority, String functionName) {
-            ScriptPlugin.this.eventHandlers.put(event, functionName);
-            ScriptPlugin.this.server.getPluginManager().registerEvent(event, ScriptPlugin.this, priority, ScriptPlugin.this);
+            //ScriptPlugin.this.eventHandlers.put(event, functionName);
+            //ScriptPlugin.this.server.getPluginManager().registerEvent(event, ScriptPlugin.this, priority, ScriptPlugin.this);
+            ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(ScriptPlugin.this, functionName), priority, ScriptPlugin.this);
         }
 
         /**
