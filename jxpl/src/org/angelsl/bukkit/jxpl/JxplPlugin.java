@@ -37,7 +37,7 @@ public final class JxplPlugin extends JavaPlugin {
         if (!loaded) {
             l.log(Level.INFO, "Initialising jxpl...");
             scriptsDir = new File(getConfiguration().getString("scripts-dir", "scripts"));
-            this.getServer().getPluginManager().RegisterInterface(ScriptLoader.class);
+            this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
             if (scriptsDir.exists() && !scriptsDir.isDirectory()) scriptsDir.delete();
             if (!scriptsDir.exists()) scriptsDir.mkdir();
             this.getServer().getPluginManager().loadPlugins(scriptsDir);
