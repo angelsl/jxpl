@@ -61,7 +61,7 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public Configuration getConfiguration() {
-        throw new RuntimeException("Script plugins do not have separate configuration files");
+        throw new RuntimeException("Script plugins do not have separate configuration files. Fuck you, Bukkit team.");
     }
 
     @Override
@@ -112,16 +112,14 @@ public class ScriptPlugin implements Plugin {
     
     public class ScriptEventListener implements Listener {
     	private String callback;
-    	private ScriptPlugin plugin;
     	
-    	public ScriptEventListener(ScriptPlugin sp, String fn) {
-    		plugin = sp;
+    	public ScriptEventListener(String fn) {
     		callback = fn;
     	}
     	
     	public void onEvent(Event.Type type, Event args) {
-    		if (plugin.isEnabled) {
-    			plugin.tryInvoke(callback, type, args);
+    		if (ScriptPlugin.this.isEnabled) {
+    			ScriptPlugin.this.tryInvoke(callback, type, args);
     		}
     	}
     }
@@ -136,7 +134,7 @@ public class ScriptPlugin implements Plugin {
          */
         @SuppressWarnings("unused")
         public void registerEvent(Event.Type event, Event.Priority priority, String functionName) {
-            ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(ScriptPlugin.this, functionName), priority, ScriptPlugin.this);
+            ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(functionName), priority, ScriptPlugin.this);
         }
 
         /**
@@ -189,6 +187,7 @@ public class ScriptPlugin implements Plugin {
          * @param path The path of the file, either absolute, or relative to Bukkit's CWD
          * @return The file's contents, or null if an error occured, or the file does not exist.
          */
+        @SuppressWarnings("unused")
         public String getFileContents(String path) {
             return getFileContents(new File(path));
         }
