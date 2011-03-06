@@ -1,9 +1,6 @@
 package org.angelsl.bukkit.jxpl;
 
-import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -13,7 +10,7 @@ import java.util.logging.Logger;
 
 public final class JxplPlugin extends JavaPlugin {
 
-    boolean loaded = false;
+    private boolean loaded = false;
     private static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 
     private static File scriptsDir = null;
@@ -35,6 +32,11 @@ public final class JxplPlugin extends JavaPlugin {
 
     public void onEnable() {
         if (!loaded) {
+            if(loadedPlugins.size() > 0)
+            {
+                l.log(Level.INFO, "jxpl was reloaded. Clearing loaded scripts...");
+                loadedPlugins.clear();
+            }
             l.log(Level.INFO, "Initialising jxpl...");
             scriptsDir = new File(getConfiguration().getString("scripts-dir", "scripts"));
             this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
