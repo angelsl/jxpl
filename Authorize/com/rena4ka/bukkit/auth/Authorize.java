@@ -4,12 +4,10 @@ package com.rena4ka.bukkit.auth;
 /*     */
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -112,11 +110,6 @@ import java.util.logging.Logger;
 
     /*     */
 /*     */
-    public Authorize(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-/* 100 */
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-/*     */
-    }
 
     /*     */
 /*     */
@@ -357,7 +350,7 @@ import java.util.logging.Logger;
 /* 223 */
             pm.registerEvent(Event.Type.PLAYER_QUIT, this.playerListener, Event.Priority.Lowest, this);
 /* 224 */
-            pm.registerEvent(Event.Type.PLAYER_COMMAND, this.playerListener, Event.Priority.Lowest, this);
+            pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, this.playerListener, Event.Priority.Lowest, this);
 /* 225 */
             pm.registerEvent(Event.Type.PLAYER_MOVE, this.playerListener, Event.Priority.Lowest, this);
 /* 226 */

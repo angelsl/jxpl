@@ -103,7 +103,7 @@ import java.sql.SQLException;
 
     /*     */
 /*     */
-    public void onPlayerCommand(PlayerChatEvent event)
+    public void onPlayerCommandPreprocess(PlayerChatEvent event)
 /*     */ {
 /*  63 */
         String[] split = event.getMessage().split(" ");
