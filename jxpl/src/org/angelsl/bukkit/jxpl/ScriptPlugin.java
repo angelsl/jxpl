@@ -15,18 +15,10 @@ import javax.script.ScriptEngine;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Created by IntelliJ IDEA.
- * User: angelsl
- * Date: 2/6/11
- * Time: 3:01 PM
- * To change this template use File | Settings | File Templates.
- */
-public class ScriptPlugin implements Plugin, Listener {
+public class ScriptPlugin implements Plugin {
 
     static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 
@@ -38,7 +30,6 @@ public class ScriptPlugin implements Plugin, Listener {
     private final File dataFolder;
     private Invocable sEngine;
     private PluginHelper helper;
-    private final HashMap<Event.Type, String> eventHandlers = new HashMap<Event.Type, String>();
 
     private static String getOrDefault(ScriptEngine e, String vname, String efault) {
         Object r = e.get(vname);
@@ -104,13 +95,7 @@ public class ScriptPlugin implements Plugin, Listener {
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
         return false;
     }
-
-    public void onEvent(Event.Type type, Event args) {
-        if (isEnabled && eventHandlers.containsKey(type)) {
-            tryInvoke(eventHandlers.get(type), type, args);
-        }
-    }
-
+    
     private Object tryInvoke(String funcName, Object... params) {
         try {
             return sEngine.invokeFunction(funcName, params);
@@ -124,6 +109,22 @@ public class ScriptPlugin implements Plugin, Listener {
     public Invocable getScriptEngine() {
         return sEngine;
     }
+    
+    public class ScriptEventListener implements Listener {
+    	private String callback;
+    	private ScriptPlugin plugin;
+    	
+    	public ScriptEventListener(ScriptPlugin sp, String fn) {
+    		plugin = sp;
+    		callback = fn;
+    	}
+    	
+    	public void onEvent(Event.Type type, Event args) {
+    		if (plugin.isEnabled) {
+    			plugin.tryInvoke(callback, type, args);
+    		}
+    	}
+    }
 
     public class PluginHelper {
         /**
@@ -135,8 +136,7 @@ public class ScriptPlugin implements Plugin, Listener {
          */
         @SuppressWarnings("unused")
         public void registerEvent(Event.Type event, Event.Priority priority, String functionName) {
-            ScriptPlugin.this.eventHandlers.put(event, functionName);
-            ScriptPlugin.this.server.getPluginManager().registerEvent(event, ScriptPlugin.this, priority, ScriptPlugin.this);
+            ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(ScriptPlugin.this, functionName), priority, ScriptPlugin.this);
         }
 
         /**
