@@ -63,15 +63,7 @@ public class BackupPlugin extends JavaPlugin implements Observer {
         return permissions;
     }
 
-    public BackupPlugin(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
 
-//        File directory = new File(desc.getName());
-//        if (!directory.exists())
-//          directory.mkdir();
-
-        MessageHandler.setServer(instance);
-    }
 
     /*
      * (non-Javadoc)
@@ -79,6 +71,7 @@ public class BackupPlugin extends JavaPlugin implements Observer {
      */
     public void onEnable() {
 
+        MessageHandler.setServer(getServer());
         try {
             //
             Field cField = CraftServer.class.getDeclaredField("console");
@@ -96,7 +89,7 @@ public class BackupPlugin extends JavaPlugin implements Observer {
         }
         // Register our events
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Event.Type.PLAYER_COMMAND, this.playerListener, Event.Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, this.playerListener, Event.Priority.Normal, this);
 
         PluginDescriptionFile pdfFile = this.getDescription();
         MessageHandler.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");

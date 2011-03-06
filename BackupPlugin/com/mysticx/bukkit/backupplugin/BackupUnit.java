@@ -69,7 +69,7 @@ public class BackupUnit extends PluginUnit {
         } finally {
             // TODO: enable saving
             consoleCommandLog("Backup process complete. Enabling level saving ...");
-            console.e.C = false;
+            console.worlds.get(0).w = false;
             setChanged();
             notifyObservers();
         }

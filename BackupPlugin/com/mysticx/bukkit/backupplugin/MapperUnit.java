@@ -100,7 +100,7 @@ public class MapperUnit extends PluginUnit {
         } finally {
             // TODO: enable saving again
             consoleCommandLog("Caching process completed. Enabling level saving.");
-            console.e.C = false;
+            console.worlds.get(0).w = false;
         }
 
 

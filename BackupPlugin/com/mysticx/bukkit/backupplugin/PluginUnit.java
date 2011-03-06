@@ -1,5 +1,6 @@
 package com.mysticx.bukkit.backupplugin;
 
+import net.minecraft.server.IProgressUpdate;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.CraftServer;
@@ -198,10 +199,10 @@ public abstract class PluginUnit extends Observable implements Runnable {
     protected void saveWorld() {
         // TODO: save world and disable saving for mapping process
         consoleCommandLog("Enabling level saving. Forcing save.");
-        console.e.C = false;
-        console.e.a(true, null);
+        console.worlds.get(0).w = false;
+        console.worlds.get(0).a(true, (IProgressUpdate)null);
         consoleCommandLog("Save complete. Disabling level saving.");
-        console.e.C = true;
+        console.worlds.get(0).w = true;
 
         sleep(3000);
     }

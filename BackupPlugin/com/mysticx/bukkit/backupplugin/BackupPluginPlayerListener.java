@@ -19,7 +19,7 @@ public class BackupPluginPlayerListener extends PlayerListener {
     }
 
     @Override
-    public void onPlayerCommand(PlayerChatEvent event) {
+    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
         Player player = event.getPlayer();
         String[] split = event.getMessage().split(" ");
 
