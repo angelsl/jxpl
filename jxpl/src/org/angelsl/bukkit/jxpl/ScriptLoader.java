@@ -43,7 +43,7 @@ public class ScriptLoader implements PluginLoader {
             }
             for (String ext : sef.getExtensions()) {
                 l.log(Level.INFO, "Adding file extension \"." + ext + "\" for scripting engine \"" + sef.getEngineName() + "\".");
-                fileFiltersR.add(Pattern.compile(Pattern.quote("." + ext) + "$"));
+                fileFiltersR.add(Pattern.compile("[^.]" + Pattern.quote("." + ext) + "$"));
             }
         }
         fileFilters = fileFiltersR.toArray(new Pattern[0]);
