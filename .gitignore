@@ -1,8 +1,9 @@
-
+*.iml
 *.ipr
 *.iws
 *.jar
 /out
 /Bukkit/
 /CraftBukkit/
-/mc-dev/
+/Backpack/
+/MinecartMania/
