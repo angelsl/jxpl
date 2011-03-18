@@ -44,7 +44,8 @@ public final class JxplPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         l.log(Level.INFO, "Initialising jxpl...");
-        if(!fixFileAssociations(getServer().getPluginManager())) l.log(Level.WARNING, "Unable to remove fix file associations. Please report this & your Bukkit build number!");
+        if (!fixFileAssociations(getServer().getPluginManager()))
+            l.log(Level.WARNING, "Unable to remove fix file associations. Please report this & your Bukkit build number!");
         this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
         scriptsDir = new File(getConfiguration().getString("scripts-dir", "scripts"));
         if (scriptsDir.exists() && !scriptsDir.isDirectory()) scriptsDir.delete();
@@ -107,7 +108,7 @@ public final class JxplPlugin extends JavaPlugin {
         if (fileAssociations == null) return false; // probably not a SPM
         ArrayList<Map.Entry<Pattern, PluginLoader>> ks = new ArrayList<Map.Entry<Pattern, PluginLoader>>(fileAssociations.entrySet()); // avoid ConcurrentModificationException... if any
         for (Map.Entry<Pattern, PluginLoader> pl : ks) {
-            if (!(pl.getValue() instanceof ScriptLoader)) {
+            if (!(pl.getValue().getClass().getName().equalsIgnoreCase(ScriptLoader.class.getName()))) {
                 fixedAssociations.put(pl.getKey(), pl.getValue());
             }
         }
