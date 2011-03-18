@@ -44,37 +44,37 @@ public class ScriptLoader implements PluginLoader {
 
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
         if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
-        ScriptEngine se = manager.getEngineByExtension(file.getName().substring(file.getName().lastIndexOf(".") + 1));
-        {
-            FileInputStream is = null;
-            InputStreamReader isr = null;
-            try {
-                is = new FileInputStream(file);
-                isr = new InputStreamReader(is);
-                se.eval(isr);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                l.log(Level.WARNING, "File not found while loading script!", e);
-                return null;
-            } catch (ScriptException e) {
-                e.printStackTrace();
-                l.log(Level.WARNING, "Error while evaluating script!", e);
-                return null;
-            } finally {
-                try {
-                    isr.close();
-                    is.close();
-                } catch (Throwable t) {
-                } // fuck off
-            }
-        }
-
-        ScriptPlugin sp = new ScriptPlugin(this, instance,
-                new PluginDescriptionFile((String)se.get("scriptName"), (String)se.get("scriptVersion"), "NOT APPLICABLE YOU BUKKIT RETARDS"),
-                getDataFolder(file), file, se);
+        ScriptEngine se = getScriptEngine(file);
+        ScriptPlugin sp = new ScriptPlugin(this, instance, new PluginDescriptionFile((String) se.get("scriptName"), (String) se.get("scriptVersion"), "NOT APPLICABLE YOU BUKKIT RETARDS"), getDataFolder(file), file, se);
         JxplPlugin.getLoadedPlugins().add(sp);
         l.log(Level.INFO, "Loaded script " + file.getName());
         return sp;
+    }
+
+    protected ScriptEngine getScriptEngine(File f) {
+        ScriptEngine se = manager.getEngineByExtension(f.getName().substring(f.getName().lastIndexOf(".") + 1));
+        FileInputStream is = null;
+        InputStreamReader isr = null;
+        try {
+            is = new FileInputStream(f);
+            isr = new InputStreamReader(is);
+            se.eval(isr);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            l.log(Level.WARNING, "File not found while loading script!", e);
+            return null;
+        } catch (ScriptException e) {
+            e.printStackTrace();
+            l.log(Level.WARNING, "Error while evaluating script!", e);
+            return null;
+        } finally {
+            try {
+                isr.close();
+                is.close();
+            } catch (Throwable t) {
+            } // fuck off
+        }
+        return se;
     }
 
     private File getDataFolder(File file) {
@@ -103,20 +103,22 @@ public class ScriptLoader implements PluginLoader {
 
     public EventExecutor createExecutor(final Event.Type type, Listener listener) {
         return new EventExecutor() {
-                    public void execute(Listener listener, Event event) {
-                        ((ScriptPlugin.ScriptEventListener)listener).onEvent(type, event);
-                    }
-                };
+            public void execute(Listener listener, Event event) {
+                ((ScriptPlugin.ScriptEventListener) listener).onEvent(type, event);
+            }
+        };
     }
 
     public void enablePlugin(Plugin plugin) {
-        if(!(plugin instanceof ScriptPlugin)) throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
+        if (!(plugin instanceof ScriptPlugin))
+            throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
         instance.getPluginManager().callEvent(new PluginEvent(Event.Type.PLUGIN_ENABLE, plugin));
         plugin.onEnable();
     }
 
     public void disablePlugin(Plugin plugin) {
-        if(!(plugin instanceof ScriptPlugin)) throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
+        if (!(plugin instanceof ScriptPlugin))
+            throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
         instance.getPluginManager().callEvent(new PluginEvent(Event.Type.PLUGIN_DISABLE, plugin));
         plugin.onDisable();
     }

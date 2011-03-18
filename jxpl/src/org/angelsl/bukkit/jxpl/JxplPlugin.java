@@ -10,7 +10,8 @@ import java.util.logging.Logger;
 
 public final class JxplPlugin extends JavaPlugin {
 
-    private boolean loaded = false;
+    private static boolean _interfaceRegistered = false; // fuck bukkit devs
+    private boolean _thisInitialised = false;
     private static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
 
     private static File scriptsDir = null;
@@ -31,23 +32,26 @@ public final class JxplPlugin extends JavaPlugin {
     }
 
     public void onEnable() {
-        if (!loaded) {
-            if(loadedPlugins.size() > 0)
-            {
+        if (!_thisInitialised) {
+            if (loadedPlugins.size() > 0) {
                 l.log(Level.INFO, "jxpl was reloaded. Clearing loaded scripts...");
                 loadedPlugins.clear();
             }
             l.log(Level.INFO, "Initialising jxpl...");
             scriptsDir = new File(getConfiguration().getString("scripts-dir", "scripts"));
-            this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
+            if (!_interfaceRegistered) {
+                this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
+                _interfaceRegistered = true;
+            }
             if (scriptsDir.exists() && !scriptsDir.isDirectory()) scriptsDir.delete();
             if (!scriptsDir.exists()) scriptsDir.mkdir();
             this.getServer().getPluginManager().loadPlugins(scriptsDir);
+            _thisInitialised = true;
         }
         for (Plugin p : loadedPlugins) {
             getServer().getPluginManager().enablePlugin(p);
         }
-        loaded = true;
+
     }
 
 }

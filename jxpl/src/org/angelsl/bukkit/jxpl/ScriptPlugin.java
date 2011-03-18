@@ -86,6 +86,11 @@ public class ScriptPlugin implements Plugin {
     }
 
     @Override
+    public void onLoad() {
+        tryInvoke("onLoad", true);
+    }
+
+    @Override
     public void onEnable() {
         isEnabled = true;
         tryInvoke("onEnable");
@@ -95,12 +100,27 @@ public class ScriptPlugin implements Plugin {
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
         return false;
     }
-    
-    private Object tryInvoke(String funcName, Object... params) {
+
+    public void reloadScript() {
+        onDisable();
+        ScriptEngine engine = ((ScriptLoader) loader).getScriptEngine(file);
+        engine.put(getOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
+        engine.put(getOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
+        engine.put(getOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
+        sEngine = (Invocable) engine;
+        onEnable();
+    }
+
+    private Object tryInvoke(String f, Object... p) {
+        return tryInvoke(f, false, p);
+    }
+
+    private Object tryInvoke(String funcName, boolean shutup, Object... params) {
         try {
             return sEngine.invokeFunction(funcName, params);
         } catch (Throwable e) {
-            l.log(Level.WARNING, "Error while running " + funcName + " of script " + file.getName() + ".", e);
+            if (!shutup)
+                l.log(Level.WARNING, "Error while running " + funcName + " of script " + file.getName() + ".", e);
         }
         return null;
     }
@@ -109,19 +129,19 @@ public class ScriptPlugin implements Plugin {
     public Invocable getScriptEngine() {
         return sEngine;
     }
-    
+
     public class ScriptEventListener implements Listener {
-    	private String callback;
-    	
-    	public ScriptEventListener(String fn) {
-    		callback = fn;
-    	}
-    	
-    	public void onEvent(Event.Type type, Event args) {
-    		if (ScriptPlugin.this.isEnabled) {
-    			ScriptPlugin.this.tryInvoke(callback, type, args);
-    		}
-    	}
+        private String callback;
+
+        public ScriptEventListener(String fn) {
+            callback = fn;
+        }
+
+        public void onEvent(Event.Type type, Event args) {
+            if (ScriptPlugin.this.isEnabled) {
+                ScriptPlugin.this.tryInvoke(callback, type, args);
+            }
+        }
     }
 
     public class PluginHelper {
@@ -166,19 +186,19 @@ public class ScriptPlugin implements Plugin {
          * @return result Object of eval if successful, null otherwise
          */
         public Object includeScript(File f) {
-    		Object result = null;
-        	try {
-        		FileReader fr = new FileReader(f);
-        		try {
-        			result = ((ScriptEngine) ScriptPlugin.this.sEngine).eval(fr);
-        		} catch(Throwable t) {
-        			l.log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
-        		}
-        		fr.close();
-        	} catch (Throwable t) {
-        		l.log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
-        	}
-			return result;
+            Object result = null;
+            try {
+                FileReader fr = new FileReader(f);
+                try {
+                    result = ((ScriptEngine) ScriptPlugin.this.sEngine).eval(fr);
+                } catch (Throwable t) {
+                    l.log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
+                }
+                fr.close();
+            } catch (Throwable t) {
+                l.log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
+            }
+            return result;
         }
 
         /**
