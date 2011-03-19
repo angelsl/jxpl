@@ -21,11 +21,11 @@ public final class JxplPlugin extends JavaPlugin {
     private static File scriptsDir = null;
     private static ArrayList<ScriptPlugin> loadedPlugins = new ArrayList<ScriptPlugin>();
 
-    public static File getScriptsDir() {
+    protected static File getScriptsDir() {
         return scriptsDir;
     }
 
-    public static ArrayList<ScriptPlugin> getLoadedPlugins() {
+    protected static ArrayList<ScriptPlugin> getLoadedPlugins() {
         return loadedPlugins;
     }
 
