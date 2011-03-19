@@ -36,3 +36,13 @@ You will need to download the jar for the language you want to run a script in.
   * `java -server -Xms2048M -Xmx3072M -cp myengine1.jar:myengine2.jar:craftbukkit.jar org.bukkit.craftbukkit.Main`
 * Windows
   * `java -server -Xms2048M -Xmx3072M -cp myengine1.jar;myengine2.jar;craftbukkit.jar org.bukkit.craftbukkit.Main`
+
+## Donations
+
+If you wish to donate, you can buy me one of these:
+
+  * A Namecheap domain
+  * XBox Live Gold Subscription
+  * A VPS or Dedicated server
+  
+Heh.
