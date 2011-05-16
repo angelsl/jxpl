@@ -1,5 +1,7 @@
 package org.angelsl.bukkit.jxpl;
 
+import com.avaje.ebean.EbeanServer;
+
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -49,6 +51,21 @@ public class ScriptPlugin implements Plugin {
         sEngine = (Invocable) engine;
     }
 
+    @Override
+    public EbeanServer getDatabase() {
+        return null;
+    }
+    
+    @Override
+    public void setNaggable(boolean canNag) {
+        
+    }
+    
+    @Override
+    public boolean isNaggable() {
+        return true;
+    }
+    
     @Override
     public File getDataFolder() {
         return dataFolder;
