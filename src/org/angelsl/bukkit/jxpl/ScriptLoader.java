@@ -42,6 +42,10 @@ public class ScriptLoader implements PluginLoader {
         fileFilters = fileFiltersR.toArray(new Pattern[0]);
     }
 
+    public Plugin loadPlugin(File file, boolean ignoreSoftDependencies) throws InvalidPluginException, InvalidDescriptionException {
+        return loadPlugin(file);
+    }
+
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
         if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
         ScriptEngine se = getScriptEngine(file);

@@ -1,7 +1,7 @@
 <project name="jxpl" default="dist" basedir=".">
 	<property name="pluginname" value="jxpl"/>
-	<property name="bukkit.jar" location="../../Bukkit/target/bukkit-0.0.1-SNAPSHOT.jar"/>
-	<property name="plugins" location="../../plugins/"/>
+	<property name="bukkit.jar" location="../Bukkit/target/bukkit-0.0.1-SNAPSHOT.jar"/>
+	<property name="plugins" location="../plugins/"/>
 
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
