@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
@@ -55,7 +56,12 @@ public class ScriptPlugin implements Plugin {
     public EbeanServer getDatabase() {
         return null;
     }
-    
+
+    @Override
+    public ChunkGenerator getDefaultWorldGenerator(String worldName, String id) {
+        return null;
+    }
+
     @Override
     public void setNaggable(boolean canNag) {
         
@@ -104,7 +110,7 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public void onLoad() {
-        tryInvoke("onLoad", true);
+        tryInvokeSilent("onLoad");
     }
 
     @Override
@@ -129,15 +135,19 @@ public class ScriptPlugin implements Plugin {
     }
 
     private Object tryInvoke(String f, Object... p) {
-        return tryInvoke(f, false, p);
+        try {
+            return sEngine.invokeFunction(f, p);
+        } catch (Throwable e) {
+                l.log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
+        }
+        return null;
     }
 
-    private Object tryInvoke(String funcName, boolean shutup, Object... params) {
+    private Object tryInvokeSilent(String funcName, Object... params) {
         try {
             return sEngine.invokeFunction(funcName, params);
         } catch (Throwable e) {
-            if (!shutup)
-                l.log(Level.WARNING, "Error while running " + funcName + " of script " + file.getName() + ".", e);
+            // silent
         }
         return null;
     }

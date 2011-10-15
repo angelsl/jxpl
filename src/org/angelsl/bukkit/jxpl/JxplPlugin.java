@@ -103,7 +103,7 @@ public final class JxplPlugin extends JavaPlugin {
 
     private static boolean fixFileAssociations(PluginManager spm) {
         if (!(spm instanceof SimplePluginManager)) return false;
-        HashMap<Pattern, PluginLoader> fileAssociations = (HashMap<Pattern, PluginLoader>) getFieldHelper((SimplePluginManager) spm, "fileAssociations");
+        HashMap<Pattern, PluginLoader> fileAssociations = (HashMap<Pattern, PluginLoader>) getFieldHelper(spm, "fileAssociations");
         HashMap<Pattern, PluginLoader> fixedAssociations = new HashMap<Pattern, PluginLoader>();
         if (fileAssociations == null) return false; // probably not a SPM
         ArrayList<Map.Entry<Pattern, PluginLoader>> ks = new ArrayList<Map.Entry<Pattern, PluginLoader>>(fileAssociations.entrySet()); // avoid ConcurrentModificationException... if any
