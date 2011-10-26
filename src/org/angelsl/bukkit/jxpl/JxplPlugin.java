@@ -47,7 +47,7 @@ public final class JxplPlugin extends JavaPlugin {
         if (!fixFileAssociations(getServer().getPluginManager()))
             l.log(Level.WARNING, "Unable to remove fix file associations. Please report this & your Bukkit build number!");
         this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
-        scriptsDir = new File(getConfiguration().getString("scripts-dir", "scripts"));
+        scriptsDir = new File(getConfig().getString("scripts-dir", "scripts"));
         if (scriptsDir.exists() && !scriptsDir.isDirectory()) scriptsDir.delete();
         if (!scriptsDir.exists()) scriptsDir.mkdir();
         this.getServer().getPluginManager().loadPlugins(scriptsDir);

@@ -1,4 +1,4 @@
-name: 'JavaxScriptPluginLoader'
+name: 'jxpl'
 main: 'org.angelsl.bukkit.jxpl.JxplPlugin'
-version: '5'
+version: '6'
 author: 'angelsl'

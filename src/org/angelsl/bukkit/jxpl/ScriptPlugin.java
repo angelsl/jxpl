@@ -5,6 +5,7 @@ import com.avaje.ebean.EbeanServer;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
@@ -18,6 +19,7 @@ import javax.script.ScriptEngine;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,7 +86,36 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public Configuration getConfiguration() {
-        throw new RuntimeException("Script plugins do not have separate configuration files. Fuck you, Bukkit team.");
+        throwBTIRFAATOPHCFORException();
+        return null;
+    }
+
+    @Override
+    public FileConfiguration getConfig() {
+        throwBTIRFAATOPHCFORException();
+        return null;
+    }
+
+    @Override
+    public InputStream getResource(String filename) {
+        throwBTIRFAATOPHCFORException()
+        return null;
+    }
+
+    @Override
+    public void saveConfig() {
+        throwBTIRFAATOPHCFORException();
+    }
+
+    @Override
+    public void reloadConfig() {
+        throwBTIRFAATOPHCFORException();
+    }
+
+    private void throwBTIRFAATOPHCFORException()
+            // throw Bukkit Team Is Retarded For Assuming All Types Of Plugins Have Configuration Files Or Resources exception
+    {
+        throw new RuntimeException("Script plugins do not have separate configuration files or resources. Fuck you, Bukkit team.");
     }
 
     @Override
@@ -105,18 +136,18 @@ public class ScriptPlugin implements Plugin {
     @Override
     public void onDisable() {
         isEnabled = false;
-        tryInvoke("onDisable");
+        tryInvoke("onDisable", false);
     }
 
     @Override
     public void onLoad() {
-        tryInvokeSilent("onLoad");
+        tryInvoke("onLoad", true);
     }
 
     @Override
     public void onEnable() {
         isEnabled = true;
-        tryInvoke("onEnable");
+        tryInvoke("onEnable", false);
     }
 
     @Override
@@ -134,20 +165,11 @@ public class ScriptPlugin implements Plugin {
         onEnable();
     }
 
-    private Object tryInvoke(String f, Object... p) {
+    private Object tryInvoke(String f, boolean stfu, Object... p) {
         try {
             return sEngine.invokeFunction(f, p);
         } catch (Throwable e) {
-                l.log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
-        }
-        return null;
-    }
-
-    private Object tryInvokeSilent(String funcName, Object... params) {
-        try {
-            return sEngine.invokeFunction(funcName, params);
-        } catch (Throwable e) {
-            // silent
+                if(!stfu) l.log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
         }
         return null;
     }
@@ -166,7 +188,7 @@ public class ScriptPlugin implements Plugin {
 
         public void onEvent(Event.Type type, Event args) {
             if (ScriptPlugin.this.isEnabled) {
-                ScriptPlugin.this.tryInvoke(callback, type, args);
+                ScriptPlugin.this.tryInvoke(callback, false, type, args);
             }
         }
     }
