@@ -5,7 +5,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.event.server.PluginEvent;
 import org.bukkit.plugin.*;
 
 import javax.script.*;
@@ -13,7 +12,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -52,13 +54,16 @@ public class ScriptLoader implements PluginLoader {
         try {
             if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
             ScriptEngine se = getScriptEngine(file);
-            ScriptPlugin sp = new ScriptPlugin(this, instance, new PluginDescriptionFile(Utils.getOrExcept(se, "SCRIPT_NAME"), Utils.getOrExcept(se, "SCRIPT_VERSION"), ""), getDataFolder(file), file, se);
+            ScriptPlugin sp = new ScriptPlugin(this, instance, pdfFromMap((Map<String, Object>)Utils.getOrExcept(se, "SCRIPT_PDF")), getDataFolder(file), file, se);
             JxplPlugin.getLoadedPlugins().add(sp);
             l.log(Level.INFO, "Loaded script " + file.getName());
             return sp;
         } catch (IllegalArgumentException iae) {
-            l.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_NAME or SCRIPT_VERSION undefined or are not strings.", file.getName()));
-            throw new InvalidDescriptionException(iae, "SCRIPT_NAME or SCRIPT_VERSION undefined or are not strings");
+            l.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()));
+            throw new InvalidDescriptionException(iae, "SCRIPT_PDF undefined");
+        } catch (ClassCastException cce) {
+            l.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()));
+            throw new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>");
         }
     }
 
@@ -86,6 +91,24 @@ public class ScriptLoader implements PluginLoader {
             } // fuck off
         }
         return se;
+    }
+
+    private PluginDescriptionFile pdfFromMap(Map<String, Object> tmap) throws InvalidDescriptionException
+    {
+        Map<String, Object> map = new HashMap<String, Object>(tmap);
+        if(!map.containsKey("main")) map.put("main", "");
+        try {
+            PluginDescriptionFile pdf = new PluginDescriptionFile("MISSINGNO.", "MISSINGNO.", "MISSINGNO.");
+            Method loadMap = PluginDescriptionFile.class.getDeclaredMethod("loadMap", Map.class);
+            loadMap.setAccessible(true);
+            loadMap.invoke(pdf, map);
+            return pdf;
+
+        } catch(Throwable t)
+        {
+            l.log(Level.SEVERE, "Failed to create plugin description file!", t);
+            throw new InvalidDescriptionException(t, "Failed to create plugin description file.");
+        }
     }
 
     private File getDataFolder(File file) {

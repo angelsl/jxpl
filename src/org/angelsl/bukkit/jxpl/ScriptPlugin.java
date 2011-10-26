@@ -44,11 +44,11 @@ public class ScriptPlugin implements Plugin {
         description = desc;
         dataFolder = folder;
         helper = new PluginHelper();
-        engine.put(Utils.getOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
-        engine.put(Utils.getOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
-        engine.put(Utils.getOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
+        engine.put(Utils.getStringOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
+        engine.put(Utils.getStringOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
+        engine.put(Utils.getStringOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
         sEngine = (Invocable) engine;
-        l = Logger.getLogger("Minecraft.JxplPlugin." + Utils.removeFromDot(plugin.getName()).replaceAll("\\W", ""));
+        l = Logger.getLogger("Minecraft.JxplPlugin." + desc.getName());
     }
 
     @Override
@@ -149,15 +149,15 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        return false;
+        return (Boolean)tryInvoke("onCommand", false, sender, command, commandLabel, args);
     }
 
     public void reloadScript() {
         onDisable();
         ScriptEngine engine = ((ScriptLoader) loader).getScriptEngine(file);
-        engine.put(Utils.getOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
-        engine.put(Utils.getOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
-        engine.put(Utils.getOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
+        engine.put(Utils.getStringOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
+        engine.put(Utils.getStringOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
+        engine.put(Utils.getStringOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
         sEngine = (Invocable) engine;
         onEnable();
     }
@@ -211,7 +211,7 @@ public class ScriptPlugin implements Plugin {
          */
         @SuppressWarnings("unused")
         public void log(Level l, String message) {
-            ScriptPlugin.this.l.log(l, message);
+            ScriptPlugin.this.l.log(l, String.format("[%s] %s", description.getName(), message));
         }
 
         /**
