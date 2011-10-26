@@ -3,6 +3,8 @@ package org.angelsl.bukkit.jxpl;
 import org.bukkit.Server;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.PluginEvent;
 import org.bukkit.plugin.*;
 
@@ -47,12 +49,17 @@ public class ScriptLoader implements PluginLoader {
     }
 
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
-        if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
-        ScriptEngine se = getScriptEngine(file);
-        ScriptPlugin sp = new ScriptPlugin(this, instance, new PluginDescriptionFile((String) se.get("scriptName"), (String) se.get("scriptVersion"), "NOT APPLICABLE YOU BUKKIT RETARDS"), getDataFolder(file), file, se);
-        JxplPlugin.getLoadedPlugins().add(sp);
-        l.log(Level.INFO, "Loaded script " + file.getName());
-        return sp;
+        try {
+            if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
+            ScriptEngine se = getScriptEngine(file);
+            ScriptPlugin sp = new ScriptPlugin(this, instance, new PluginDescriptionFile(Utils.getOrExcept(se, "SCRIPT_NAME"), Utils.getOrExcept(se, "SCRIPT_VERSION"), ""), getDataFolder(file), file, se);
+            JxplPlugin.getLoadedPlugins().add(sp);
+            l.log(Level.INFO, "Loaded script " + file.getName());
+            return sp;
+        } catch (IllegalArgumentException iae) {
+            l.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_NAME or SCRIPT_VERSION undefined or are not strings.", file.getName()));
+            throw new InvalidDescriptionException(iae, "SCRIPT_NAME or SCRIPT_VERSION undefined or are not strings");
+        }
     }
 
     protected ScriptEngine getScriptEngine(File f) {
@@ -116,14 +123,14 @@ public class ScriptLoader implements PluginLoader {
     public void enablePlugin(Plugin plugin) {
         if (!(plugin instanceof ScriptPlugin))
             throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
-        instance.getPluginManager().callEvent(new PluginEvent(Event.Type.PLUGIN_ENABLE, plugin));
+        instance.getPluginManager().callEvent(new PluginEnableEvent(plugin));
         plugin.onEnable();
     }
 
     public void disablePlugin(Plugin plugin) {
         if (!(plugin instanceof ScriptPlugin))
             throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
-        instance.getPluginManager().callEvent(new PluginEvent(Event.Type.PLUGIN_DISABLE, plugin));
+        instance.getPluginManager().callEvent(new PluginDisableEvent(plugin));
         plugin.onDisable();
     }
 }

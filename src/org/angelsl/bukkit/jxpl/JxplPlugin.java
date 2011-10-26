@@ -36,7 +36,7 @@ public final class JxplPlugin extends JavaPlugin {
     }
 
     public void onEnable() {
-        for (Plugin p : loadedPlugins) {
+        for (ScriptPlugin p : loadedPlugins) {
             getServer().getPluginManager().enablePlugin(p);
         }
     }
@@ -45,7 +45,7 @@ public final class JxplPlugin extends JavaPlugin {
     public void onLoad() {
         l.log(Level.INFO, "Initialising jxpl...");
         if (!fixFileAssociations(getServer().getPluginManager()))
-            l.log(Level.WARNING, "Unable to remove fix file associations. Please report this & your Bukkit build number!");
+            l.log(Level.WARNING, "Unable to fix file associations. Please report this & your Bukkit build number!");
         this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
         scriptsDir = new File(getConfig().getString("scripts-dir", "scripts"));
         if (scriptsDir.exists() && !scriptsDir.isDirectory()) scriptsDir.delete();
