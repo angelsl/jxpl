@@ -1,4 +1,4 @@
-# jxpl - The javax.scripting Plugin Loader
+# jxpl - The __j__ava__x__.scripting __P__lugin __L__oader
 
 jxpl is a plugin providing a plugin loader that loads whatever script engines work with javax.script, and are Invocable.
 
@@ -16,13 +16,13 @@ You will need to download the jar for the language you want to run a script in.
 
 * ### JavaScript
   * Mozilla Rhino 1.6R2, included with Java 6
-  * [Mozilla Rhino 1.7R2](http://www.mozilla.org/rhino/download.html) 
+  * [Mozilla Rhino 1.7R3](http://www.mozilla.org/rhino/download.html) 
  
 * ### [Python 2.5 (Jython)](http://www.jython.org/downloads.html)
   * You'll need to download the installer, run it and create a standalone jar.
  
-* ### [Ruby 1.8 (JRuby)](http://www.jruby.org/download)
-  * From the download page you can get the file "jruby-complete-1.6.0.RC2.jar".
+* ### [Ruby 1.9 (JRuby)](http://www.jruby.org/download)
+  * From the download page you can get the file "jruby-complete-1.6.5.jar".
 
 * ### [Groovy](http://groovy.codehaus.org/Download)
 
@@ -31,6 +31,8 @@ You will need to download the jar for the language you want to run a script in.
 ## Craftbukkit startup script
 
 ### For usage with Jython and other engines in the form of JARs
+
+Always include the scripts before craftbukkit in the classpath.
 
 * Linux
   * `java -server -Xms2048M -Xmx3072M -cp myengine1.jar:myengine2.jar:craftbukkit.jar org.bukkit.craftbukkit.Main`
@@ -42,7 +44,7 @@ You will need to download the jar for the language you want to run a script in.
 If you wish to donate, you can buy me one of these:
 
   * A Namecheap domain
-  * XBox Live Gold Subscription
+  * Xbox Live Gold Subscription
   * A VPS or Dedicated server
   
 Heh.
