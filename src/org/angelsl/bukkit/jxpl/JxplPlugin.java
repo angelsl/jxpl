@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 
 public final class JxplPlugin extends JavaPlugin {
     private static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
-
     private static File scriptsDir = null;
     private static ArrayList<ScriptPlugin> loadedPlugins = new ArrayList<ScriptPlugin>();
 
@@ -53,6 +52,7 @@ public final class JxplPlugin extends JavaPlugin {
     }
 
     public void onEnable() {
+        if(scriptsDir == null) onLoad();
         for (ScriptPlugin p : loadedPlugins) {
             getServer().getPluginManager().enablePlugin(p);
         }
