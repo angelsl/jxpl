@@ -232,6 +232,18 @@ public class ScriptPlugin implements Plugin {
         }
 
         /**
+         * Logs a message.
+         *
+         * @param l       The level of the message
+         * @param message The message to be logged
+         * @param thrown  The exception thrown
+         */
+        @SuppressWarnings("unused")
+        public void log(Level l, String message, Throwable thrown) {
+            ScriptPlugin.this.l.log(l, String.format("[%s] %s", description.getName(), message), thrown);
+        }
+
+        /**
          * Includes a script, with a path either absolute, or relative to Bukkit's current working directory (should be the root directory)
          *
          * @param s The file name of the script to include
