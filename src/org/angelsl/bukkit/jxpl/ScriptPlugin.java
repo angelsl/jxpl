@@ -73,7 +73,9 @@ public class ScriptPlugin implements Plugin {
         sEngine = (Invocable) engine;
         if (dataFolder != null && Utils.getOrDefault(rdescription, "jxpl.hasconfig", false)) {
             configFile = new File(dataFolder, "config.yml");
-        } else configFile = null;
+        } else {
+            configFile = null;
+        }
     }
 
     private File initialiseDataFolder() {
@@ -94,14 +96,15 @@ public class ScriptPlugin implements Plugin {
 
     private YamlConfiguration getDefaultConfig() {
         try {
-            Map<String, Object> defmap = (Map<String, Object>) Utils.getOrExcept((ScriptEngine) sEngine, "SCRIPT_PDF");
+            Map<String, Object> defmap = (Map<String, Object>) Utils.getOrExcept((ScriptEngine) sEngine, "DEFAULT_CONFIG");
             YamlConfiguration yamldef = new YamlConfiguration();
-            Method loadFromMap = yamldef.getClass().getMethod("deserializeValues", defmap.getClass(), ConfigurationSection.class);
+            Method loadFromMap = YamlConfiguration.class.getDeclaredMethod("deserializeValues", Map.class, ConfigurationSection.class);
             loadFromMap.setAccessible(true);
             loadFromMap.invoke(yamldef, defmap, yamldef);
             return yamldef;
+        } catch (IllegalArgumentException e) {
         } catch (Throwable t) {
-            l.log(Level.SEVERE, "Failed to load default config file.", t);
+            l.log(Level.SEVERE, "Failed to get default config!", t);
         }
         return null;
     }
@@ -171,7 +174,10 @@ public class ScriptPlugin implements Plugin {
     @Override
     public void reloadConfig() {
         config = YamlConfiguration.loadConfiguration(configFile);
-        config.setDefaults(getDefaultConfig());
+        YamlConfiguration defaults = getDefaultConfig();
+        if (defaults != null) {
+            config.setDefaults(defaults);
+        }
     }
 
     @Override
