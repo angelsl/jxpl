@@ -29,10 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -69,9 +66,11 @@ public class ScriptLoader implements PluginLoader {
 
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
         try {
-            if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) return null;
+            if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) {
+                return null;
+            }
             ScriptEngine se = getScriptEngine(file);
-            ScriptPlugin sp = new ScriptPlugin(this, instance, pdfFromMap((Map<String, Object>)Utils.getOrExcept(se, "SCRIPT_PDF")), getDataFolder(file), file, se);
+            ScriptPlugin sp = new ScriptPlugin(this, instance, file, se);
             JxplPlugin.getLoadedPlugins().add(sp);
             l.log(Level.INFO, "Loaded script " + file.getName());
             return sp;
@@ -110,44 +109,6 @@ public class ScriptLoader implements PluginLoader {
         return se;
     }
 
-    private PluginDescriptionFile pdfFromMap(Map<String, Object> tmap) throws InvalidDescriptionException
-    {
-        Map<String, Object> map = new HashMap<String, Object>(tmap);
-        if(!map.containsKey("main")) map.put("main", "");
-        try {
-            PluginDescriptionFile pdf = new PluginDescriptionFile("MISSINGNO.", "MISSINGNO.", "MISSINGNO.");
-            Method loadMap = PluginDescriptionFile.class.getDeclaredMethod("loadMap", Map.class);
-            loadMap.setAccessible(true);
-            loadMap.invoke(pdf, map);
-            return pdf;
-
-        } catch(Throwable t)
-        {
-            l.log(Level.SEVERE, "Failed to create plugin description file!", t);
-            throw new InvalidDescriptionException(t, "Failed to create plugin description file.");
-        }
-    }
-
-    private File getDataFolder(File file) {
-        File dataFolder = null;
-
-        String filename = file.getName();
-        int index = file.getName().lastIndexOf(".");
-
-        if (index != -1) {
-            String name = filename.substring(0, index);
-            dataFolder = new File(file.getParentFile(), name);
-        } else {
-            // This is if there is no extension, which should not happen
-            // Using _ to prevent name collision
-            dataFolder = new File(file.getParentFile(), filename + "_");
-        }
-
-        //dataFolder.mkdirs();
-
-        return dataFolder;
-    }
-
     public Pattern[] getPluginFileFilters() {
         return fileFilters;
     }
@@ -161,15 +122,17 @@ public class ScriptLoader implements PluginLoader {
     }
 
     public void enablePlugin(Plugin plugin) {
-        if (!(plugin instanceof ScriptPlugin))
+        if (!(plugin instanceof ScriptPlugin)) {
             throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
+        }
         instance.getPluginManager().callEvent(new PluginEnableEvent(plugin));
         plugin.onEnable();
     }
 
     public void disablePlugin(Plugin plugin) {
-        if (!(plugin instanceof ScriptPlugin))
+        if (!(plugin instanceof ScriptPlugin)) {
             throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
+        }
         instance.getPluginManager().callEvent(new PluginDisableEvent(plugin));
         plugin.onDisable();
     }

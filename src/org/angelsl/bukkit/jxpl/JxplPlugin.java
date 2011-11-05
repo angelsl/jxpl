@@ -17,7 +17,6 @@
 
 package org.angelsl.bukkit.jxpl;
 
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
@@ -52,7 +51,9 @@ public final class JxplPlugin extends JavaPlugin {
     }
 
     public void onEnable() {
-        if(scriptsDir == null) onLoad();
+        if (scriptsDir == null) {
+            onLoad();
+        }
         for (ScriptPlugin p : loadedPlugins) {
             getServer().getPluginManager().enablePlugin(p);
         }
@@ -61,12 +62,17 @@ public final class JxplPlugin extends JavaPlugin {
     @Override
     public void onLoad() {
         l.log(Level.INFO, "Initialising jxpl...");
-        if (!fixFileAssociations(getServer().getPluginManager()))
+        if (!fixFileAssociations(getServer().getPluginManager())) {
             l.log(Level.WARNING, "Unable to fix file associations. Please report this & your Bukkit build number!");
+        }
         this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
         scriptsDir = new File(getConfig().getString("scripts-dir", "scripts"));
-        if (scriptsDir.exists() && !scriptsDir.isDirectory()) scriptsDir.delete();
-        if (!scriptsDir.exists()) scriptsDir.mkdir();
+        if (scriptsDir.exists() && !scriptsDir.isDirectory()) {
+            scriptsDir.delete();
+        }
+        if (!scriptsDir.exists()) {
+            scriptsDir.mkdir();
+        }
         this.getServer().getPluginManager().loadPlugins(scriptsDir);
     }
 
@@ -119,10 +125,14 @@ public final class JxplPlugin extends JavaPlugin {
     }
 
     private static boolean fixFileAssociations(PluginManager spm) {
-        if (!(spm instanceof SimplePluginManager)) return false;
+        if (!(spm instanceof SimplePluginManager)) {
+            return false;
+        }
         HashMap<Pattern, PluginLoader> fileAssociations = (HashMap<Pattern, PluginLoader>) getFieldHelper(spm, "fileAssociations");
         HashMap<Pattern, PluginLoader> fixedAssociations = new HashMap<Pattern, PluginLoader>();
-        if (fileAssociations == null) return false; // probably not a SPM
+        if (fileAssociations == null) {
+            return false; // probably not a SPM
+        }
         ArrayList<Map.Entry<Pattern, PluginLoader>> ks = new ArrayList<Map.Entry<Pattern, PluginLoader>>(fileAssociations.entrySet()); // avoid ConcurrentModificationException... if any
         for (Map.Entry<Pattern, PluginLoader> pl : ks) {
             if (!(pl.getValue().getClass().getName().equalsIgnoreCase(ScriptLoader.class.getName()))) {

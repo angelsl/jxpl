@@ -18,14 +18,16 @@
 package org.angelsl.bukkit.jxpl;
 
 import com.avaje.ebean.EbeanServer;
-
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
@@ -33,10 +35,9 @@ import org.bukkit.util.config.Configuration;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,26 +47,63 @@ public class ScriptPlugin implements Plugin {
     private final PluginLoader loader;
     private final Server server;
     private final File file;
+    private final Map<String, Object> rdescription;
     private final PluginDescriptionFile description;
     private final File dataFolder;
+    private FileConfiguration config = null;
+    private final File configFile;
     private Invocable sEngine;
     private PluginHelper helper;
     private Logger l;
     private boolean naggable = true;
 
 
-    public ScriptPlugin(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ScriptEngine engine) {
+    public ScriptPlugin(PluginLoader pluginLoader, Server instance, File plugin, ScriptEngine engine) throws InvalidDescriptionException {
         loader = pluginLoader;
         server = instance;
         file = plugin;
-        description = desc;
-        dataFolder = folder;
+        rdescription = (Map<String, Object>) Utils.getOrExcept(engine, "SCRIPT_PDF");
+        description = Utils.getPdfFromMap(rdescription);
+        l = Logger.getLogger("Minecraft.JxplPlugin." + description.getName());
+        dataFolder = initialiseDataFolder();
         helper = new PluginHelper();
-        engine.put(Utils.getStringOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
-        engine.put(Utils.getStringOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
-        engine.put(Utils.getStringOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
+        engine.put(Utils.getOrDefault(rdescription, "jxpl.helpervarname", "helper"), helper);
+        engine.put(Utils.getOrDefault(rdescription, "jxpl.pluginvarname", "plugin"), this);
+        engine.put(Utils.getOrDefault(rdescription, "jxpl.servervarname", "server"), server);
         sEngine = (Invocable) engine;
-        l = Logger.getLogger("Minecraft.JxplPlugin." + desc.getName());
+        if (dataFolder != null && Utils.getOrDefault(rdescription, "jxpl.hasconfig", false)) {
+            configFile = new File(dataFolder, "config.yml");
+        } else configFile = null;
+    }
+
+    private File initialiseDataFolder() {
+        if (Utils.getOrDefault(rdescription, "jxpl.hasdatafolder", false)) {
+            File tempFolder = new File(file.getParentFile(), description.getName());
+            if (tempFolder.exists() && !tempFolder.isDirectory()) {
+                l.log(Level.WARNING, String.format("Data folder for %s at path \"%s\" exists but is a file.", description.getName(), tempFolder.getAbsolutePath()));
+            } else if ((tempFolder.exists() && tempFolder.isDirectory()) || !tempFolder.exists()) {
+                if (!tempFolder.exists() && !tempFolder.mkdirs()) {
+                    l.log(Level.WARNING, String.format("Failed to create data folder for %s at path \"%s\".", description.getName(), tempFolder.getAbsolutePath()));
+                } else {
+                    return tempFolder;
+                }
+            }
+        }
+        return null;
+    }
+
+    private YamlConfiguration getDefaultConfig() {
+        try {
+            Map<String, Object> defmap = (Map<String, Object>) Utils.getOrExcept((ScriptEngine) sEngine, "SCRIPT_PDF");
+            YamlConfiguration yamldef = new YamlConfiguration();
+            Method loadFromMap = yamldef.getClass().getMethod("deserializeValues", defmap.getClass(), ConfigurationSection.class);
+            loadFromMap.setAccessible(true);
+            loadFromMap.invoke(yamldef, defmap, yamldef);
+            return yamldef;
+        } catch (Throwable t) {
+            l.log(Level.SEVERE, "Failed to load default config file.", t);
+        }
+        return null;
     }
 
     @Override
@@ -100,36 +138,40 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public Configuration getConfiguration() {
-        throwBTIRFAATOPHCFORException();
         return null;
     }
 
     @Override
     public FileConfiguration getConfig() {
-        throwBTIRFAATOPHCFORException();
-        return null;
+        if (config == null) {
+            reloadConfig();
+        }
+        return config;
     }
 
     @Override
     public InputStream getResource(String filename) {
-        throwBTIRFAATOPHCFORException();
+        try {
+            return new FileInputStream(new File(dataFolder, filename));
+        } catch (Throwable t) {
+            l.log(Level.SEVERE, String.format("Failed to get resource \"%s\".", filename), t);
+        }
         return null;
     }
 
     @Override
     public void saveConfig() {
-        throwBTIRFAATOPHCFORException();
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            l.log(Level.SEVERE, "Failed to save configuration file.", e);
+        }
     }
 
     @Override
     public void reloadConfig() {
-        throwBTIRFAATOPHCFORException();
-    }
-
-    private void throwBTIRFAATOPHCFORException()
-    // throw Bukkit Team Is Retarded For Assuming All Types Of Plugins Have Configuration Files Or Resources exception
-    {
-        throw new RuntimeException("Script plugins do not have separate configuration files or resources. Fuck you, Bukkit team.");
+        config = YamlConfiguration.loadConfiguration(configFile);
+        config.setDefaults(getDefaultConfig());
     }
 
     @Override
@@ -166,7 +208,7 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        return (Boolean)tryInvoke("onCommand", false, sender, command, commandLabel, args);
+        return (Boolean) tryInvoke("onCommand", false, sender, command, commandLabel, args);
     }
 
     public void reloadScript() {
@@ -183,7 +225,9 @@ public class ScriptPlugin implements Plugin {
         try {
             return sEngine.invokeFunction(f, p);
         } catch (Throwable e) {
-            if (!stfu) l.log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
+            if (!stfu) {
+                l.log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
+            }
         }
         return null;
     }

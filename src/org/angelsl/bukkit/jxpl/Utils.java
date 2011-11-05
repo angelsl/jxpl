@@ -17,7 +17,13 @@
 
 package org.angelsl.bukkit.jxpl;
 
+import org.bukkit.plugin.InvalidDescriptionException;
+import org.bukkit.plugin.PluginDescriptionFile;
+
 import javax.script.ScriptEngine;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 class Utils {
     public static String removeExtension(String s) {
@@ -35,8 +41,9 @@ class Utils {
 
         // Remove the extension.
         int extensionIndex = filename.lastIndexOf(".");
-        if (extensionIndex == -1)
+        if (extensionIndex == -1) {
             return filename;
+        }
 
         return filename.substring(0, extensionIndex);
     }
@@ -56,8 +63,9 @@ class Utils {
 
         // Remove the extension.
         int extensionIndex = filename.indexOf(".");
-        if (extensionIndex == -1)
+        if (extensionIndex == -1) {
             return filename;
+        }
 
         return filename.substring(0, extensionIndex);
     }
@@ -69,16 +77,45 @@ class Utils {
 
     public static String getStringOrExcept(ScriptEngine e, String vname) {
         Object r = e.get(vname);
-        if (r == null || !(r instanceof String))
+        if (r == null || !(r instanceof String)) {
             throw new IllegalArgumentException("No variable named " + vname + " in script engine that is a String");
+        }
         return (String) r;
     }
 
     public static Object getOrExcept(ScriptEngine e, String vname) {
         Object r = e.get(vname);
-        if (r == null)
+        if (r == null) {
             throw new IllegalArgumentException("No variable named " + vname + " in script engine");
+        }
         return r;
+    }
+
+    public static String getOrDefault(Map<String, Object> e, String key, String efault) {
+        Object r = e.get(key);
+        return r == null || !(r instanceof String) ? efault : (String) r;
+    }
+
+    public static Boolean getOrDefault(Map<String, Object> e, String key, Boolean efault) {
+        Object r = e.get(key);
+        return r == null || !(r instanceof Boolean) ? efault : (Boolean) r;
+    }
+
+    public static PluginDescriptionFile getPdfFromMap(Map<String, Object> tmap) throws InvalidDescriptionException {
+        Map<String, Object> map = new HashMap<String, Object>(tmap);
+        if (!map.containsKey("main")) {
+            map.put("main", "");
+        }
+        try {
+            PluginDescriptionFile pdf = new PluginDescriptionFile("MISSINGNO.", "MISSINGNO.", "MISSINGNO.");
+            Method loadMap = PluginDescriptionFile.class.getDeclaredMethod("loadMap", Map.class);
+            loadMap.setAccessible(true);
+            loadMap.invoke(pdf, map);
+            return pdf;
+
+        } catch (Throwable t) {
+            throw new InvalidDescriptionException(t, "Failed to create plugin description file.");
+        }
     }
 
 }
