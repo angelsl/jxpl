@@ -19,7 +19,7 @@
     <repositories>
         <repository>
             <id>bukkit_repos</id>
-            <url>http://repo.bukkit.org/content/groups/bukkit_repos/</url>
+            <url>http://repo.bukkit.org/content/groups/repo</url>
         </repository>
     </repositories>
     <build>
