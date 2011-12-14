@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.angelsl</groupId>
     <artifactId>jxpl</artifactId>
-    <version>r8</version>
+    <version>r9</version>
     <name>jxpl</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
