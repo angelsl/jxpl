@@ -26,18 +26,9 @@ You will need to download the jar for the language you want to run a script in.
 
 * ### [Groovy](http://groovy.codehaus.org/Download)
 
-* ### [Scheme (Kawa)](http://www.gnu.org/software/kawa/)
+### Installing script engines
 
-## Craftbukkit startup script
-
-### For usage with Jython and other engines in the form of JARs
-
-Always include the scripts before craftbukkit in the classpath.
-
-* Linux
-  * `java -server -Xms2048M -Xmx3072M -cp myengine1.jar:myengine2.jar:craftbukkit.jar org.bukkit.craftbukkit.Main`
-* Windows
-  * `java -server -Xms2048M -Xmx3072M -cp myengine1.jar;myengine2.jar;craftbukkit.jar org.bukkit.craftbukkit.Main`
+Simply drop the JAR into `plugins/jxpl/lib/` and restart your server.
 
 ## Donations
 
