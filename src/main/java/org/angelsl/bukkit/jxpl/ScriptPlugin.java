@@ -54,17 +54,26 @@ public class ScriptPlugin implements Plugin {
     private final File configFile;
     private Invocable sEngine;
     private PluginHelper helper;
-    private Logger l;
+    private Logger logger;
     private boolean naggable = true;
 
+    private void log(Level l, String message)
+    {
+        logger.log(l, String.format("[jxpl.%s] %s", description.getName(), message));
+    }
 
+    private void log(Level l, String message, Throwable t)
+    {
+        logger.log(l, String.format("[jxpl.%s] %s", description.getName(), message), t);
+    }
+    
     public ScriptPlugin(PluginLoader pluginLoader, Server instance, File plugin, ScriptEngine engine) throws InvalidDescriptionException {
         loader = pluginLoader;
         server = instance;
         file = plugin;
         rdescription = (Map<String, Object>) Utils.getOrExcept(engine, "SCRIPT_PDF");
         description = Utils.getPdfFromMap(rdescription);
-        l = Logger.getLogger("Minecraft.JxplPlugin." + description.getName());
+        logger = Logger.getLogger("Minecraft.JxplPlugin." + description.getName());
         dataFolder = initialiseDataFolder();
         helper = new PluginHelper();
         engine.put(Utils.getOrDefault(rdescription, "jxpl.helpervarname", "helper"), helper);
@@ -82,10 +91,10 @@ public class ScriptPlugin implements Plugin {
         if (Utils.getOrDefault(rdescription, "jxpl.hasdatafolder", false)) {
             File tempFolder = new File(file.getParentFile(), description.getName());
             if (tempFolder.exists() && !tempFolder.isDirectory()) {
-                l.log(Level.WARNING, String.format("Data folder for %s at path \"%s\" exists but is a file.", description.getName(), tempFolder.getAbsolutePath()));
+                log(Level.WARNING, String.format("Data folder for %s at path \"%s\" exists but is a file.", description.getName(), tempFolder.getAbsolutePath()));
             } else if ((tempFolder.exists() && tempFolder.isDirectory()) || !tempFolder.exists()) {
                 if (!tempFolder.exists() && !tempFolder.mkdirs()) {
-                    l.log(Level.WARNING, String.format("Failed to create data folder for %s at path \"%s\".", description.getName(), tempFolder.getAbsolutePath()));
+                    log(Level.WARNING, String.format("Failed to create data folder for %s at path \"%s\".", description.getName(), tempFolder.getAbsolutePath()));
                 } else {
                     return tempFolder;
                 }
@@ -98,13 +107,11 @@ public class ScriptPlugin implements Plugin {
         try {
             Map<String, Object> defmap = (Map<String, Object>) Utils.getOrExcept((ScriptEngine) sEngine, "DEFAULT_CONFIG");
             YamlConfiguration yamldef = new YamlConfiguration();
-            Method loadFromMap = YamlConfiguration.class.getDeclaredMethod("deserializeValues", Map.class, ConfigurationSection.class);
-            loadFromMap.setAccessible(true);
-            loadFromMap.invoke(yamldef, defmap, yamldef);
+            Utils.callMethodHelper(yamldef, "deserializeValues", defmap, yamldef);
             return yamldef;
         } catch (IllegalArgumentException e) {
         } catch (Throwable t) {
-            l.log(Level.SEVERE, "Failed to get default config!", t);
+            log(Level.SEVERE, "Failed to get default config!", t);
         }
         return null;
     }
@@ -157,7 +164,7 @@ public class ScriptPlugin implements Plugin {
         try {
             return new FileInputStream(new File(dataFolder, filename));
         } catch (Throwable t) {
-            l.log(Level.SEVERE, String.format("Failed to get resource \"%s\".", filename), t);
+            log(Level.SEVERE, String.format("Failed to get resource \"%s\".", filename), t);
         }
         return null;
     }
@@ -167,7 +174,7 @@ public class ScriptPlugin implements Plugin {
         try {
             config.save(configFile);
         } catch (IOException e) {
-            l.log(Level.SEVERE, "Failed to save configuration file.", e);
+            log(Level.SEVERE, "Failed to save configuration file.", e);
         }
     }
 
@@ -232,7 +239,7 @@ public class ScriptPlugin implements Plugin {
             return sEngine.invokeFunction(f, p);
         } catch (Throwable e) {
             if (!stfu) {
-                l.log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
+                log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
             }
         }
         return null;
@@ -278,7 +285,7 @@ public class ScriptPlugin implements Plugin {
          */
         @SuppressWarnings("unused")
         public void log(Level l, String message) {
-            ScriptPlugin.this.l.log(l, String.format("[%s] %s", description.getName(), message));
+            ScriptPlugin.this.logger.log(l, String.format("[jxpl.%1$s] [%1$s] %2$s", description.getName(), message));
         }
 
         /**
@@ -290,7 +297,7 @@ public class ScriptPlugin implements Plugin {
          */
         @SuppressWarnings("unused")
         public void log(Level l, String message, Throwable thrown) {
-            ScriptPlugin.this.l.log(l, String.format("[%s] %s", description.getName(), message), thrown);
+            ScriptPlugin.this.logger.log(l, String.format("[jxpl.%1$s] [%1$s] %2$s", description.getName(), message), thrown);
         }
 
         /**
@@ -317,11 +324,11 @@ public class ScriptPlugin implements Plugin {
                 try {
                     result = ((ScriptEngine) ScriptPlugin.this.sEngine).eval(fr);
                 } catch (Throwable t) {
-                    l.log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
+                    log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
                 }
                 fr.close();
             } catch (Throwable t) {
-                l.log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
+                log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
             }
             return result;
         }

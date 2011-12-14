@@ -25,39 +25,72 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.*;
 
 import javax.script.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ScriptLoader implements PluginLoader {
-    static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
-
     private final Server instance;
     private Pattern[] fileFilters;
-    private final ScriptEngineManager manager = new ScriptEngineManager();
+    private final ScriptEngineManager manager;
 
     public ScriptLoader(Server instance) {
         this.instance = instance;
-
+        loadScriptEngines();
+        manager = new ScriptEngineManager();
         ArrayList<Pattern> fileFiltersR = new ArrayList<Pattern>();
         for (ScriptEngineFactory sef : manager.getEngineFactories()) {
             try {
                 Invocable t = ((Invocable) sef.getScriptEngine());
             } catch (Throwable t) {
                 // engine does not support invocable. pass.
+                Utils.log(Level.WARNING, String.format("Failed to load script engine \"%s %s\"! Is the engine Invocable?", sef.getEngineName(), sef.getEngineVersion()), t);
                 continue;
             }
             for (String ext : sef.getExtensions()) {
-                l.log(Level.INFO, "Adding file extension \"." + ext + "\" for scripting engine \"" + sef.getEngineName() + "\".");
+                Utils.log(Level.INFO, "Adding file extension \"." + ext + "\" for scripting engine \"" + sef.getEngineName() + "\".");
                 fileFiltersR.add(Pattern.compile("[^.].*" + Pattern.quote("." + ext) + "$"));
             }
         }
         fileFilters = fileFiltersR.toArray(new Pattern[0]);
+    }
+
+    private static void loadScriptEngines() {
+        ClassLoader ucl = Thread.currentThread().getContextClassLoader();
+        if (!(ucl instanceof URLClassLoader)) {
+            Utils.log(Level.WARNING, String.format("Thread classloader is not a URLClassLoader but a \"%s\"! Could not inject script engine JARs.", ucl.getClass().getName()));
+            return;
+        }
+        File libDir = new File(JxplPlugin.getPlugin().getDataFolder(), "lib");
+        if(!libDir.exists() || (libDir.exists() && libDir.isFile()))
+        {
+            Utils.log(Level.INFO, String.format("Creating directory \"%s\".", libDir.getAbsolutePath()));
+            libDir.delete();
+            if(!libDir.mkdirs())
+            {
+                Utils.log(Level.WARNING, String.format("Failed to create directory \"%s\"!", libDir.getAbsolutePath()));
+            }
+        }
+        File[] engineJars = libDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".jar");
+            }
+        });
+
+        for (File jar : engineJars) {
+            try {
+                Utils.callMethodHelper(ucl, "addURL", jar.toURI().toURL());
+                Utils.log(Level.INFO, String.format("Injected JAR at \"%s\".", jar.getAbsolutePath()));
+            } catch (MalformedURLException murle) {
+                Utils.log(Level.WARNING, String.format("Failed to inject JAR at \"%s\"!", jar.getAbsolutePath()), murle);
+                continue;
+            }
+        }
     }
 
     public Plugin loadPlugin(File file, boolean ignoreSoftDependencies) throws InvalidPluginException, InvalidDescriptionException {
@@ -72,13 +105,13 @@ public class ScriptLoader implements PluginLoader {
             ScriptEngine se = getScriptEngine(file);
             ScriptPlugin sp = new ScriptPlugin(this, instance, file, se);
             JxplPlugin.getLoadedPlugins().add(sp);
-            l.log(Level.INFO, "Loaded script " + file.getName());
+            Utils.log(Level.INFO, String.format("Loaded script \"%s\" ([%s] version [%s] by [%s])",file.getName(), sp.getDescription().getName(), sp.getDescription().getVersion(), Utils.join(sp.getDescription().getAuthors(), ", ")));
             return sp;
         } catch (IllegalArgumentException iae) {
-            l.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()));
             throw new InvalidDescriptionException(iae, "SCRIPT_PDF undefined");
         } catch (ClassCastException cce) {
-            l.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()));
             throw new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>");
         }
     }
@@ -93,11 +126,11 @@ public class ScriptLoader implements PluginLoader {
             se.eval(isr);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            l.log(Level.WARNING, "File not found while loading script!", e);
+            Utils.log(Level.WARNING, "File not found while loading script!", e);
             return null;
         } catch (ScriptException e) {
             e.printStackTrace();
-            l.log(Level.WARNING, "Error while evaluating script!", e);
+            Utils.log(Level.WARNING, "Error while evaluating script!", e);
             return null;
         } finally {
             try {

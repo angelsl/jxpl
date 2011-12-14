@@ -21,11 +21,18 @@ import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 import javax.script.ScriptEngine;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+// I know it's bad practice to have a class containing miscellaneous methods but I really cba. so fuck practice.
 class Utils {
+    private static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
     public static String removeExtension(String s) {
 
         String separator = System.getProperty("file.separator");
@@ -116,6 +123,102 @@ class Utils {
         } catch (Throwable t) {
             throw new InvalidDescriptionException(t, "Failed to create plugin description file.");
         }
+    }
+
+    public static Object getFieldHelper(Object o, String name) {
+        try {
+            Class c = o.getClass();
+            Field f = null;
+            while (f == null) {
+                if (c != null) {
+                    try {
+                        f = c.getDeclaredField(name);
+                    } catch (Throwable t) {
+                        c = c.getSuperclass();
+                    }
+                }
+            }
+            if (f != null) {
+                f.setAccessible(true);
+                return f.get(o);
+            }
+        } catch (Throwable t) {
+        }
+
+        return null;
+    }
+
+    public static boolean setFieldHelper(Object o, String name, Object v) {
+        try {
+            Class c = o.getClass();
+            Field f = null;
+            while (f == null) {
+                if (c != null) {
+                    try {
+                        f = c.getDeclaredField(name);
+                    } catch (Throwable t) {
+                        c = c.getSuperclass();
+                    }
+                }
+            }
+            if (f != null) {
+                f.setAccessible(true);
+                f.set(o, v);
+                return true;
+            }
+        } catch (Throwable t) {
+        }
+        return false;
+    }
+
+    public static boolean callMethodHelper(Object toHack, String methodName, Object... params) {
+        Class[] paramClasses = new Class[params.length];
+        for (int i = 0; i < paramClasses.length; ++i)
+            paramClasses[i] = params[i].getClass();
+        Class toHackClass = toHack.getClass();
+        for (; ; ) {
+            try {
+                Method loadFromMap = toHackClass.getDeclaredMethod(methodName, paramClasses);
+                loadFromMap.setAccessible(true);
+                loadFromMap.invoke(toHack, params);
+                return true;
+            } catch (NoSuchMethodException nsme) {
+                toHackClass = toHackClass.getSuperclass();
+                if(toHackClass == null) return false;
+                continue;
+            }  catch(Throwable ite)
+            {
+                log(Level.WARNING, String.format("Failed to call method \"%s\" of class \"%s\" or superclasses by reflection", methodName, toHack.getClass().getName()), ite);
+                return false;
+            }
+        }
+    }
+    
+    public static void log(Level level, String message)
+    {
+        l.log(level, String.format("[jxpl] %s", message));
+    }
+
+    public static void log(Level level, String message, Throwable t)
+    {
+        l.log(level, String.format("[jxpl] %s", message), t);
+    }
+
+    public static String join(List<String> list, String delim) {
+
+        StringBuilder sb = new StringBuilder();
+
+        String loopDelim = "";
+
+        for(String s : list) {
+
+            sb.append(loopDelim);
+            sb.append(s);
+
+            loopDelim = delim;
+        }
+
+        return sb.toString();
     }
 
 }

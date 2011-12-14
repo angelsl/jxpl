@@ -32,9 +32,18 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public final class JxplPlugin extends JavaPlugin {
-    private static Logger l = Logger.getLogger("Minecraft.JxplPlugin");
     private static File scriptsDir = null;
     private static ArrayList<ScriptPlugin> loadedPlugins = new ArrayList<ScriptPlugin>();
+    private static JxplPlugin thisPlugin;
+    
+    public JxplPlugin() {
+        thisPlugin = this;
+    }
+
+    protected static JxplPlugin getPlugin()
+    {
+        return thisPlugin;
+    }
 
     protected static File getScriptsDir() {
         return scriptsDir;
@@ -61,9 +70,9 @@ public final class JxplPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        l.log(Level.INFO, "Initialising jxpl...");
+        Utils.log(Level.INFO, String.format("Initialising jxpl on server version \"%s\", Bukkit version \"%s\"", getServer().getVersion(), getServer().getBukkitVersion()));
         if (!fixFileAssociations(getServer().getPluginManager())) {
-            l.log(Level.WARNING, "Unable to fix file associations. Please report this & your Bukkit build number!");
+            Utils.log(Level.WARNING, "Unable to fix file associations. Please report this with your (Craft)Bukkit version!");
         }
         this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
         scriptsDir = new File(getConfig().getString("scripts-dir", "scripts"));
@@ -78,57 +87,11 @@ public final class JxplPlugin extends JavaPlugin {
 
     // WARNING: DIRTY SHIT FOLLOWS.
 
-    private static Object getFieldHelper(Object o, String name) {
-        try {
-            Class c = o.getClass();
-            Field f = null;
-            while (f == null) {
-                if (c != null) {
-                    try {
-                        f = c.getDeclaredField(name);
-                    } catch (Throwable t) {
-                        c = c.getSuperclass();
-                    }
-                }
-            }
-            if (f != null) {
-                f.setAccessible(true);
-                return f.get(o);
-            }
-        } catch (Throwable t) {
-        }
-
-        return null;
-    }
-
-    private static boolean setFieldHelper(Object o, String name, Object v) {
-        try {
-            Class c = o.getClass();
-            Field f = null;
-            while (f == null) {
-                if (c != null) {
-                    try {
-                        f = c.getDeclaredField(name);
-                    } catch (Throwable t) {
-                        c = c.getSuperclass();
-                    }
-                }
-            }
-            if (f != null) {
-                f.setAccessible(true);
-                f.set(o, v);
-                return true;
-            }
-        } catch (Throwable t) {
-        }
-        return false;
-    }
-
     private static boolean fixFileAssociations(PluginManager spm) {
         if (!(spm instanceof SimplePluginManager)) {
             return false;
         }
-        HashMap<Pattern, PluginLoader> fileAssociations = (HashMap<Pattern, PluginLoader>) getFieldHelper(spm, "fileAssociations");
+        HashMap<Pattern, PluginLoader> fileAssociations = (HashMap<Pattern, PluginLoader>) Utils.getFieldHelper(spm, "fileAssociations");
         HashMap<Pattern, PluginLoader> fixedAssociations = new HashMap<Pattern, PluginLoader>();
         if (fileAssociations == null) {
             return false; // probably not a SPM
@@ -139,7 +102,7 @@ public final class JxplPlugin extends JavaPlugin {
                 fixedAssociations.put(pl.getKey(), pl.getValue());
             }
         }
-        return setFieldHelper(spm, "fileAssociations", fixedAssociations);
+        return Utils.setFieldHelper(spm, "fileAssociations", fixedAssociations);
     }
 
     // END DIRTY SHIT
