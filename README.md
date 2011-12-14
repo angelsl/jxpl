@@ -14,17 +14,15 @@ Examples are in the [jxpl-scripts repository](https://github.com/angelsl/jxpl-sc
 
 You will need to download the jar for the language you want to run a script in.
 
-* ### JavaScript
+* __JavaScript__
   * Mozilla Rhino 1.6R2, included with Java 6
-  * [Mozilla Rhino 1.7R3](http://www.mozilla.org/rhino/download.html) 
- 
-* ### [Python 2.5 (Jython)](http://www.jython.org/downloads.html)
+  * [Mozilla Rhino 1.7R3](http://www.mozilla.org/rhino/download.html)  
+* __[Python 2.5 (Jython)](http://www.jython.org/downloads.html)__
   * You'll need to download the installer, run it and create a standalone jar.
- 
-* ### [Ruby 1.9 (JRuby)](http://www.jruby.org/download)
+* __[Ruby 1.9 (JRuby)](http://www.jruby.org/download)__
   * From the download page you can get the file "jruby-complete-1.6.5.jar".
-
-* ### [Groovy](http://groovy.codehaus.org/Download)
+* __[Groovy](http://groovy.codehaus.org/Download)__
+* __[Lua](http://code.google.com/p/jnlua/downloads/list)__
 
 ### Installing script engines
 
