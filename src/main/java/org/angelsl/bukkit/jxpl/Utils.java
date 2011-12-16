@@ -19,7 +19,6 @@ package org.angelsl.bukkit.jxpl;
 
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
-import sun.org.mozilla.javascript.internal.NativeObject;
 
 import javax.script.ScriptEngine;
 import java.io.File;
@@ -235,24 +234,6 @@ class Utils {
         }
 
         return sb.toString();
-    }
-    
-    public static Map<String, Object> scriptObjectToMap(NativeObject no)
-    {
-        HashMap<String, Object> ret = new HashMap<String, Object>();
-        for(Object id : no.getAllIds())
-        {
-            if(id instanceof Integer) {
-                Integer cid = (Integer)id;
-                Object cido = no.get(cid, no);
-                ret.put(cid.toString(), cido instanceof NativeObject ? scriptObjectToMap((NativeObject)cido) : cido);
-            } else if(id instanceof String) {
-                String cid = (String)id;
-                Object cido = no.get(cid, no);
-                ret.put(cid, cido instanceof NativeObject ? scriptObjectToMap((NativeObject)cido) : cido);
-            }
-        }
-        return ret;
     }
 
 }
