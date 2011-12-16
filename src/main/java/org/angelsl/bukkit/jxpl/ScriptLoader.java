@@ -105,16 +105,16 @@ public class ScriptLoader implements PluginLoader {
             Utils.log(Level.INFO, String.format("Loaded script \"%s\" ([%s] version [%s] by [%s])", file.getName(), sp.getDescription().getName(), sp.getDescription().getVersion(), Utils.join(sp.getDescription().getAuthors(), ", ")));
             return sp;
         } catch (IllegalArgumentException iae) {
-            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()), iae);
             throw new InvalidDescriptionException(iae, "SCRIPT_PDF undefined");
         } catch (ClassCastException cce) {
-            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()), cce);
             throw new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>");
         } catch (FileNotFoundException fnfe) {
-            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; file not found.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; file not found.", file.getName()), fnfe);
             throw new InvalidPluginException(fnfe);
         } catch (ScriptException se) {
-            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; error while parsing script.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; error while parsing script.", file.getName()), se);
             throw new InvalidPluginException(se);
         }
     }
