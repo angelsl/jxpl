@@ -29,6 +29,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.*;
 import org.bukkit.util.config.Configuration;
+import sun.org.mozilla.javascript.internal.NativeObject;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -72,7 +73,7 @@ public class ScriptPlugin implements Plugin {
         loader = pluginLoader;
         server = instance;
         file = plugin;
-        rdescription = (Map<String, Object>) Utils.getOrExcept(engine, "SCRIPT_PDF");
+        rdescription = Utils.scriptObjectToMap((NativeObject)Utils.getOrExcept(engine, "SCRIPT_PDF"));
         description = Utils.getPdfFromMap(rdescription);
         logger = Logger.getLogger("Minecraft.JxplPlugin." + description.getName());
         dataFolder = initialiseDataFolder();
