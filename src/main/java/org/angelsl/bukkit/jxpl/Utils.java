@@ -21,6 +21,7 @@ import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 import javax.script.ScriptEngine;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -187,10 +188,25 @@ class Utils {
                 continue;
             }  catch(Throwable ite)
             {
-                log(Level.WARNING, String.format("Failed to call method \"%s\" of class \"%s\" or superclasses by reflection", methodName, toHack.getClass().getName()), ite);
+                log(Level.SEVERE, String.format("Failed to call method \"%s\" of class \"%s\" or superclasses by reflection", methodName, toHack.getClass().getName()), ite);
                 return false;
             }
         }
+    }
+
+    public static boolean dirExistOrCreate(File dir) {
+        if (!dir.exists() || (dir.exists() && dir.isFile())) {
+            if (dir.exists() && dir.isFile()) {
+                dir.delete();
+                Utils.log(Level.INFO, String.format("Deleting file \"%s\".", dir.getAbsolutePath()));
+            }
+
+            if (!dir.mkdirs()) {
+                Utils.log(Level.SEVERE, String.format("Failed to create directory \"%s\"!", dir.getAbsolutePath()));
+                return false;
+            } else Utils.log(Level.INFO, String.format("Created directory \"%s\".", dir.getAbsolutePath()));
+        }
+        return true;
     }
     
     public static void log(Level level, String message)

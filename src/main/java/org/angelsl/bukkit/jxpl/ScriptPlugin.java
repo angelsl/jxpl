@@ -32,6 +32,7 @@ import org.bukkit.util.config.Configuration;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -90,15 +91,7 @@ public class ScriptPlugin implements Plugin {
     private File initialiseDataFolder() {
         if (Utils.getOrDefault(rdescription, "jxpl.hasdatafolder", false)) {
             File tempFolder = new File(file.getParentFile(), description.getName());
-            if (tempFolder.exists() && !tempFolder.isDirectory()) {
-                log(Level.WARNING, String.format("Data folder for %s at path \"%s\" exists but is a file.", description.getName(), tempFolder.getAbsolutePath()));
-            } else if ((tempFolder.exists() && tempFolder.isDirectory()) || !tempFolder.exists()) {
-                if (!tempFolder.exists() && !tempFolder.mkdirs()) {
-                    log(Level.WARNING, String.format("Failed to create data folder for %s at path \"%s\".", description.getName(), tempFolder.getAbsolutePath()));
-                } else {
-                    return tempFolder;
-                }
-            }
+            if(Utils.dirExistOrCreate(tempFolder)) return tempFolder;
         }
         return null;
     }
@@ -221,7 +214,7 @@ public class ScriptPlugin implements Plugin {
                 ssrl.removeAll(toRemove);
             }
         } catch (Throwable t) {
-            log(Level.WARNING, "Failed to deregister listeners on disable! Please report this with your (Craft)Bukkit version!", t);
+            log(Level.SEVERE, "Failed to deregister listeners on disable! Please report this with your (Craft)Bukkit version!", t);
         }
     }
     
@@ -243,12 +236,19 @@ public class ScriptPlugin implements Plugin {
 
     public void reloadScript() {
         onDisable();
-        ScriptEngine engine = ((ScriptLoader) loader).getScriptEngine(file);
-        engine.put(Utils.getStringOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
-        engine.put(Utils.getStringOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
-        engine.put(Utils.getStringOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
-        sEngine = (Invocable) engine;
-        onEnable();
+        try {
+            ScriptEngine engine = ((ScriptLoader) loader).getScriptEngine(file);
+            engine.put(Utils.getStringOrDefault(engine, "HELPER_VARIABLE_NAME", "helper"), helper);
+            engine.put(Utils.getStringOrDefault(engine, "PLUGIN_VARIABLE_NAME", "plugin"), this);
+            engine.put(Utils.getStringOrDefault(engine, "SERVER_VARIABLE_NAME", "server"), server);
+            sEngine = (Invocable) engine;
+        } catch (FileNotFoundException fnfe) {
+            log(Level.SEVERE, String.format("Not reloading script \"%s\"; file not found. Was the script file moved or deleted?", file.getName()), fnfe);
+        } catch (ScriptException sex) {
+            log(Level.SEVERE, String.format("Not reloading script \"%s\"; error while parsing script.", file.getName()), sex);
+        } finally {
+            onEnable();
+        }
     }
 
     private Object tryInvoke(String f, boolean stfu, Object... p) {
@@ -256,7 +256,7 @@ public class ScriptPlugin implements Plugin {
             return sEngine.invokeFunction(f, p);
         } catch (Throwable e) {
             if (!stfu) {
-                log(Level.WARNING, "Error while running " + f + " of script " + file.getName() + ".", e);
+                log(Level.SEVERE, "Error while running " + f + " of script " + file.getName() + ".", e);
             }
         }
         return null;
@@ -341,11 +341,11 @@ public class ScriptPlugin implements Plugin {
                 try {
                     result = ((ScriptEngine) ScriptPlugin.this.sEngine).eval(fr);
                 } catch (Throwable t) {
-                    log(Level.WARNING, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
+                    log(Level.SEVERE, "Failed to include script " + f.getPath() + " from " + file.getPath(), t);
                 }
                 fr.close();
             } catch (Throwable t) {
-                log(Level.WARNING, "Could not read file " + f.getPath() + " from " + file.getPath(), t);
+                log(Level.SEVERE, "Failed to read file " + f.getPath() + " from " + file.getPath(), t);
             }
             return result;
         }

@@ -72,7 +72,7 @@ public final class JxplPlugin extends JavaPlugin {
     public void onLoad() {
         Utils.log(Level.INFO, String.format("Initialising jxpl on server version \"%s\", Bukkit version \"%s\"", getServer().getVersion(), getServer().getBukkitVersion()));
         if (!fixFileAssociations(getServer().getPluginManager())) {
-            Utils.log(Level.WARNING, "Unable to fix file associations. Please report this with your (Craft)Bukkit version!");
+            Utils.log(Level.SEVERE, "Unable to fix file associations. Please report this with your (Craft)Bukkit version!");
         }
         this.getServer().getPluginManager().registerInterface(ScriptLoader.class);
         scriptsDir = new File(getConfig().getString("scripts-dir", "scripts"));
@@ -89,6 +89,7 @@ public final class JxplPlugin extends JavaPlugin {
 
     private static boolean fixFileAssociations(PluginManager spm) {
         if (!(spm instanceof SimplePluginManager)) {
+            Utils.log(Level.WARNING, String.format("Plugin manager is not a SimplePluginManager but a \"%s\"! Refusing to fix file associations.", spm.getClass().getName()));
             return false;
         }
         HashMap<Pattern, PluginLoader> fileAssociations = (HashMap<Pattern, PluginLoader>) Utils.getFieldHelper(spm, "fileAssociations");

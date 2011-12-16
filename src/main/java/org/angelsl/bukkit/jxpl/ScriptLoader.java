@@ -48,7 +48,7 @@ public class ScriptLoader implements PluginLoader {
                 Invocable t = ((Invocable) sef.getScriptEngine());
             } catch (Throwable t) {
                 // engine does not support invocable. pass.
-                Utils.log(Level.WARNING, String.format("Failed to load script engine \"%s %s\"! Is the engine Invocable?", sef.getEngineName(), sef.getEngineVersion()), t);
+                Utils.log(Level.SEVERE, String.format("Failed to load script engine \"%s %s\"! Is the engine Invocable?", sef.getEngineName(), sef.getEngineVersion()), t);
                 continue;
             }
             for (String ext : sef.getExtensions()) {
@@ -62,18 +62,13 @@ public class ScriptLoader implements PluginLoader {
     private static void loadScriptEngines() {
         ClassLoader ucl = Thread.currentThread().getContextClassLoader();
         if (!(ucl instanceof URLClassLoader)) {
-            Utils.log(Level.WARNING, String.format("Thread classloader is not a URLClassLoader but a \"%s\"! Could not inject script engine JARs.", ucl.getClass().getName()));
+            Utils.log(Level.WARNING, String.format("Thread classloader is not a URLClassLoader but a \"%s\"! Refusing to inject script engine JARs.", ucl.getClass().getName()));
             return;
         }
         File libDir = new File(JxplPlugin.getPlugin().getDataFolder(), "lib");
-        if(!libDir.exists() || (libDir.exists() && libDir.isFile()))
-        {
-            Utils.log(Level.INFO, String.format("Creating directory \"%s\".", libDir.getAbsolutePath()));
-            libDir.delete();
-            if(!libDir.mkdirs())
-            {
-                Utils.log(Level.WARNING, String.format("Failed to create directory \"%s\"!", libDir.getAbsolutePath()));
-            }
+        if (!Utils.dirExistOrCreate(libDir)) {
+            Utils.log(Level.SEVERE, String.format("jxpl lib directory doesn't exist and creation failed; refusing to inject script engine JARs."));
+            return;
         }
         File[] engineJars = libDir.listFiles(new FilenameFilter() {
             @Override
@@ -87,7 +82,7 @@ public class ScriptLoader implements PluginLoader {
                 Utils.callMethodHelper(ucl, "addURL", jar.toURI().toURL());
                 Utils.log(Level.INFO, String.format("Injected JAR at \"%s\".", jar.getAbsolutePath()));
             } catch (MalformedURLException murle) {
-                Utils.log(Level.WARNING, String.format("Failed to inject JAR at \"%s\"!", jar.getAbsolutePath()), murle);
+                Utils.log(Level.SEVERE, String.format("Failed to inject JAR at \"%s\"!", jar.getAbsolutePath()), murle);
                 continue;
             }
         }
@@ -100,7 +95,7 @@ public class ScriptLoader implements PluginLoader {
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
         try {
             if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) {
-                Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; Script not in scripts directory.", file.getName()));
+                Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; script not in scripts directory.", file.getName()));
                 throw new InvalidPluginException(new IllegalArgumentException("Script not in scripts directory."));
             }
             ScriptEngine se = getScriptEngine(file);
@@ -116,10 +111,10 @@ public class ScriptLoader implements PluginLoader {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()));
             throw new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>");
         } catch (FileNotFoundException fnfe) {
-            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; File not found.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; file not found.", file.getName()));
             throw new InvalidPluginException(fnfe);
         } catch (ScriptException se) {
-            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; Error while parsing script.", file.getName()));
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; error while parsing script.", file.getName()));
             throw new InvalidPluginException(se);
         }
     }
@@ -156,7 +151,7 @@ public class ScriptLoader implements PluginLoader {
 
     public void enablePlugin(Plugin plugin) {
         if (!(plugin instanceof ScriptPlugin)) {
-            throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
+            throw new IllegalArgumentException("Wrong PluginLoader called to enable plugin!");
         }
         instance.getPluginManager().callEvent(new PluginEnableEvent(plugin));
         plugin.onEnable();
@@ -164,7 +159,7 @@ public class ScriptLoader implements PluginLoader {
 
     public void disablePlugin(Plugin plugin) {
         if (!(plugin instanceof ScriptPlugin)) {
-            throw new RuntimeException("Wrong PluginLoader called to enable plugin!");
+            throw new IllegalArgumentException("Wrong PluginLoader called to enable plugin!");
         }
         instance.getPluginManager().callEvent(new PluginDisableEvent(plugin));
         plugin.onDisable();
