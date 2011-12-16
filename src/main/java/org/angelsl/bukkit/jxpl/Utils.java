@@ -119,7 +119,6 @@ class Utils {
             loadMap.setAccessible(true);
             loadMap.invoke(pdf, map);
             return pdf;
-
         } catch (Throwable t) {
             throw new InvalidDescriptionException(t, "Failed to create plugin description file.");
         }

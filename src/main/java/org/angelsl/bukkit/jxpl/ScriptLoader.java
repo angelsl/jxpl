@@ -100,12 +100,14 @@ public class ScriptLoader implements PluginLoader {
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
         try {
             if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) {
-                return null;
+                Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; Script not in scripts directory.", file.getName()));
+                throw new InvalidPluginException(new IllegalArgumentException("Script not in scripts directory."));
             }
             ScriptEngine se = getScriptEngine(file);
+
             ScriptPlugin sp = new ScriptPlugin(this, instance, file, se);
             JxplPlugin.getLoadedPlugins().add(sp);
-            Utils.log(Level.INFO, String.format("Loaded script \"%s\" ([%s] version [%s] by [%s])",file.getName(), sp.getDescription().getName(), sp.getDescription().getVersion(), Utils.join(sp.getDescription().getAuthors(), ", ")));
+            Utils.log(Level.INFO, String.format("Loaded script \"%s\" ([%s] version [%s] by [%s])", file.getName(), sp.getDescription().getName(), sp.getDescription().getVersion(), Utils.join(sp.getDescription().getAuthors(), ", ")));
             return sp;
         } catch (IllegalArgumentException iae) {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()));
@@ -113,10 +115,16 @@ public class ScriptLoader implements PluginLoader {
         } catch (ClassCastException cce) {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()));
             throw new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>");
+        } catch (FileNotFoundException fnfe) {
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; File not found.", file.getName()));
+            throw new InvalidPluginException(fnfe);
+        } catch (ScriptException se) {
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; Error while parsing script.", file.getName()));
+            throw new InvalidPluginException(se);
         }
     }
 
-    protected ScriptEngine getScriptEngine(File f) {
+    protected ScriptEngine getScriptEngine(File f) throws FileNotFoundException, ScriptException {
         ScriptEngine se = manager.getEngineByExtension(f.getName().substring(f.getName().lastIndexOf(".") + 1));
         FileInputStream is = null;
         InputStreamReader isr = null;
@@ -124,14 +132,6 @@ public class ScriptLoader implements PluginLoader {
             is = new FileInputStream(f);
             isr = new InputStreamReader(is);
             se.eval(isr);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Utils.log(Level.WARNING, "File not found while loading script!", e);
-            return null;
-        } catch (ScriptException e) {
-            e.printStackTrace();
-            Utils.log(Level.WARNING, "Error while evaluating script!", e);
-            return null;
         } finally {
             try {
                 isr.close();
