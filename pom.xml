@@ -33,6 +33,19 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <finalName>${project.artifactId}</finalName>
     </build>
@@ -51,5 +64,11 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
+		<dependency>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>1.7R3</version>
+			<type>jar</type>
+		</dependency>
     </dependencies>
 </project>
