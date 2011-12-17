@@ -166,8 +166,8 @@ public class ScriptLoader implements PluginLoader {
         try {
             is = new FileInputStream(f);
             isr = new InputStreamReader(is);
-            se.eval(isr);
             se.put(ScriptEngine.FILENAME, f.getName());
+            se.eval(isr);
         } finally {
             try {
                 isr.close();
