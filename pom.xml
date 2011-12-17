@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.angelsl</groupId>
     <artifactId>jxpl</artifactId>
-    <version>r10</version>
+    <version>r11</version>
     <name>jxpl</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,6 +45,29 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>maven-replacer-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>                   
+                    </execution>
+                </executions>
+                <configuration>
+                    <file>target/classes/plugin.yml</file>
+                    <regex>false</regex>
+                    <replacements>
+                        <replacement>
+                            <token>$version$</token>
+                            <value>${project.version}</value>
+                        </replacement>         
+                    </replacements>
+                </configuration>
             </plugin>
         </plugins>
         <finalName>${project.artifactId}</finalName>

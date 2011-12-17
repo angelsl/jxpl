@@ -68,7 +68,7 @@ public final class JxplPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        Utils.log(Level.INFO, String.format("Initialising jxpl on server version \"%s\", Bukkit version \"%s\"", getServer().getVersion(), getServer().getBukkitVersion()));
+        Utils.log(Level.INFO, String.format("Initialising jxpl %s on server version \"%s\", Bukkit version \"%s\"", getDescription().getVersion(), getServer().getVersion(), getServer().getBukkitVersion()));
         if (!fixFileAssociations(getServer().getPluginManager())) {
             Utils.log(Level.SEVERE, "Unable to fix file associations. Please report this with your (Craft)Bukkit version!");
         }

@@ -1,4 +1,4 @@
 name: 'jxpl'
 main: 'org.angelsl.bukkit.jxpl.JxplPlugin'
-version: '10'
+version: '$version$'
 author: 'angelsl'
