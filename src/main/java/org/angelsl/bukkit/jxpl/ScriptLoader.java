@@ -17,6 +17,7 @@
 
 package org.angelsl.bukkit.jxpl;
 
+import org.angelsl.bukkit.jxpl.rhino.RhinoScriptEngineFactory;
 import org.bukkit.Server;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
@@ -28,38 +29,62 @@ import javax.script.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ScriptLoader implements PluginLoader {
     private final Server instance;
-    private Pattern[] fileFilters;
+    private final HashMap<Pattern, ScriptEngineFactory> factoryAssociation = new HashMap<Pattern, ScriptEngineFactory>();
     private final ScriptEngineManager manager;
+    private final List<String> BLACKLISTED = Arrays.asList(new String[]{"apple.applescript.AppleScriptEngineFactory", "com.sun.script.javascript.RhinoScriptEngineFactory"});
 
     public ScriptLoader(Server instance) {
         this.instance = instance;
-        loadScriptEngines();
+        injectScriptEngines();
         manager = new ScriptEngineManager();
-        ArrayList<Pattern> fileFiltersR = new ArrayList<Pattern>();
+        HashMap<String, ScriptEngineFactory> fassocR = new HashMap<String, ScriptEngineFactory>();
         for (ScriptEngineFactory sef : manager.getEngineFactories()) {
-            try {
-                Invocable t = ((Invocable) sef.getScriptEngine());
-            } catch (Throwable t) {
-                // engine does not support invocable. pass.
-                Utils.log(Level.SEVERE, String.format("Failed to load script engine \"%s %s\"! Is the engine Invocable?", sef.getEngineName(), sef.getEngineVersion()), t);
+            if(BLACKLISTED.contains(sef.getClass().getName())) {
+                Utils.log(Level.INFO, String.format("Not using script engine \"%s %s\", factory \"%s\"; blacklisted", sef.getEngineName(), sef.getEngineVersion(), sef.getClass().getName()));
                 continue;
             }
-            for (String ext : sef.getExtensions()) {
-                Utils.log(Level.INFO, "Adding file extension \"." + ext + "\" for scripting engine \"" + sef.getEngineName() + "\".");
-                fileFiltersR.add(Pattern.compile("[^.].*" + Pattern.quote("." + ext) + "$"));
-            }
+            addScriptEngineHelper(fassocR, sef);
         }
-        fileFilters = fileFiltersR.toArray(new Pattern[0]);
+        addScriptEngineHelper(fassocR, new RhinoScriptEngineFactory());
+        for(Map.Entry<String, ScriptEngineFactory> messef : fassocR.entrySet())
+        {
+            factoryAssociation.put(Pattern.compile(messef.getKey()), messef.getValue());
+        }
+    }
+    
+    private void addScriptEngineHelper(HashMap<String, ScriptEngineFactory> fassocR, ScriptEngineFactory sef)
+    {
+        try {
+            ScriptEngine se = sef.getScriptEngine();
+            Invocable toss = ((Invocable)se);
+        } catch (ClassCastException cce) {
+            Utils.log(Level.INFO, String.format("Not using script engine \"%s %s\", factory \"%s\"; not Invocable", sef.getEngineName(), sef.getEngineVersion(), sef.getClass().getName()));
+            return;
+        } catch (Throwable t) {
+            Utils.log(Level.SEVERE, String.format("Error while checking script engine \"%s %s\"!", sef.getEngineName(), sef.getEngineVersion()), t);
+            return;
+        }
+        for (String ext : sef.getExtensions()) {
+            String ptrn = ("[^.].*" + Pattern.quote("." + ext.toLowerCase()) + "$");
+            if(fassocR.containsKey(ptrn))
+            {
+                Utils.log(Level.WARNING, String.format("File extension \"%s\" has more than one script engine handling; will use first loaded engine.", ext));
+                Utils.log(Level.WARNING, String.format("Not adding file extension \".%s\" for script engine \"%s %s\".", ext, sef.getEngineName(), sef.getEngineVersion()));//"Adding file extension \"." + ext + "\" for scripting engine \"" + sef.getEngineName() + "\".");
+                continue;
+            }
+            fassocR.put(ptrn, sef);
+            Utils.log(Level.INFO, String.format("File extension \".%s\" will be handled by script engine \"%s %s\".", ext, sef.getEngineName(), sef.getEngineVersion()));//"Adding file extension \"." + ext + "\" for scripting engine \"" + sef.getEngineName() + "\".");
+        }
     }
 
-    private static void loadScriptEngines() {
+    private static void injectScriptEngines() {
         ClassLoader ucl = Thread.currentThread().getContextClassLoader();
         if (!(ucl instanceof URLClassLoader)) {
             Utils.log(Level.WARNING, String.format("Thread classloader is not a URLClassLoader but a \"%s\"! Refusing to inject script engine JARs.", ucl.getClass().getName()));
@@ -87,6 +112,16 @@ public class ScriptLoader implements PluginLoader {
             }
         }
     }
+    
+    private ScriptEngineFactory getScriptEngineFactory(String fname) throws InvalidPluginException
+    {
+        for(Map.Entry<Pattern, ScriptEngineFactory> sef : factoryAssociation.entrySet())
+        {
+            Matcher m = sef.getKey().matcher(fname);
+            if(m.find()) return sef.getValue();
+        }
+        return null;
+    }
 
     public Plugin loadPlugin(File file, boolean ignoreSoftDependencies) throws InvalidPluginException, InvalidDescriptionException {
         return loadPlugin(file);
@@ -99,7 +134,6 @@ public class ScriptLoader implements PluginLoader {
                 throw new InvalidPluginException(new IllegalArgumentException("Script not in scripts directory."));
             }
             ScriptEngine se = getScriptEngine(file);
-
             ScriptPlugin sp = new ScriptPlugin(this, instance, file, se);
             JxplPlugin.getLoadedPlugins().add(sp);
             Utils.log(Level.INFO, String.format("Loaded script \"%s\" ([%s] version [%s] by [%s])", file.getName(), sp.getDescription().getName(), sp.getDescription().getVersion(), Utils.join(sp.getDescription().getAuthors(), ", ")));
@@ -119,14 +153,21 @@ public class ScriptLoader implements PluginLoader {
         }
     }
 
-    protected ScriptEngine getScriptEngine(File f) throws FileNotFoundException, ScriptException {
-        ScriptEngine se = manager.getEngineByExtension(f.getName().substring(f.getName().lastIndexOf(".") + 1));
+    protected ScriptEngine getScriptEngine(File f) throws FileNotFoundException, ScriptException, InvalidPluginException {
+        ScriptEngineFactory sef = getScriptEngineFactory(f.getName());
+        if(sef == null)
+        {
+            Utils.log(Level.INFO, String.format("Refusing to load plugin \"%s\"; extension not handled by jxpl", f.getName()));
+            throw new InvalidPluginException(new IllegalArgumentException(String.format("Not loading plugin \"%s\"; jxpl doesn't handle this extension!", f.getName())));
+        }
+        ScriptEngine se = sef.getScriptEngine();
         FileInputStream is = null;
         InputStreamReader isr = null;
         try {
             is = new FileInputStream(f);
             isr = new InputStreamReader(is);
             se.eval(isr);
+            se.put(ScriptEngine.FILENAME, f.getName());
         } finally {
             try {
                 isr.close();
@@ -138,7 +179,7 @@ public class ScriptLoader implements PluginLoader {
     }
 
     public Pattern[] getPluginFileFilters() {
-        return fileFilters;
+        return factoryAssociation.keySet().toArray(new Pattern[0]);
     }
 
     public EventExecutor createExecutor(final Event.Type type, Listener listener) {

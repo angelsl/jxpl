@@ -21,7 +21,6 @@ import com.avaje.ebean.EbeanServer;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Event;
@@ -34,7 +33,6 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.*;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
@@ -139,6 +137,7 @@ public class ScriptPlugin implements Plugin {
         return description;
     }
 
+    @Deprecated
     @Override
     public Configuration getConfiguration() {
         return null;
@@ -246,6 +245,8 @@ public class ScriptPlugin implements Plugin {
             log(Level.SEVERE, String.format("Not reloading script \"%s\"; file not found. Was the script file moved or deleted?", file.getName()), fnfe);
         } catch (ScriptException sex) {
             log(Level.SEVERE, String.format("Not reloading script \"%s\"; error while parsing script.", file.getName()), sex);
+        } catch (InvalidPluginException ipe) {
+            log(Level.SEVERE, String.format("Not reloading script \"%s\"; someone broke jxpl via reflection.", file.getName()), ipe);
         } finally {
             onEnable();
         }

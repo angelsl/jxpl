@@ -23,12 +23,10 @@ import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public final class JxplPlugin extends JavaPlugin {
@@ -105,7 +103,5 @@ public final class JxplPlugin extends JavaPlugin {
         }
         return Utils.setFieldHelper(spm, "fileAssociations", fixedAssociations);
     }
-
     // END DIRTY SHIT
-
 }

@@ -19,11 +19,13 @@ package org.angelsl.bukkit.jxpl;
 
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.mozilla.javascript.Scriptable;
 
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.swing.*;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +95,7 @@ class Utils {
 
     public static Object getOrExcept(ScriptEngine e, String vname) {
         Object r = e.get(vname);
-        if (r == null) {
+        if (r == null || r == Scriptable.NOT_FOUND) {
             throw new IllegalArgumentException("No variable named " + vname + " in script engine");
         }
         return r;
