@@ -230,7 +230,9 @@ public class ScriptPlugin implements Plugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-        return (Boolean) tryInvoke("onCommand", false, sender, command, commandLabel, args);
+        Boolean ret = (Boolean) tryInvoke("onCommand", false, sender, command, commandLabel, args);
+        if(ret == null) { log(Level.WARNING, String.format("onCommand(\"%s\"): not all code paths return a value! Returning false.", command.getName())); }
+        return ret == null ? false : ret;
     }
 
     public void reloadScript() {
