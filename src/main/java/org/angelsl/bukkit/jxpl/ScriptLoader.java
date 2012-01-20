@@ -190,6 +190,11 @@ public class ScriptLoader implements PluginLoader {
         };
     }
 
+    @Override
+    public Map<Class<? extends Event>, Set<RegisteredListener>> createRegisteredListeners(Listener listener, Plugin plugin) {
+        throw new UnsupportedOperationException("Script plugins do not have separate listener classes.");
+    }
+
     public void enablePlugin(Plugin plugin) {
         if (!(plugin instanceof ScriptPlugin)) {
             throw new IllegalArgumentException("Wrong PluginLoader called to enable plugin!");

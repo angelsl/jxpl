@@ -118,6 +118,11 @@ public class ScriptPlugin implements Plugin {
     }
 
     @Override
+    public Logger getLogger() {
+        return logger;
+    }
+
+    @Override
     public void setNaggable(boolean canNag) {
         naggable = canNag;
     }
@@ -171,6 +176,24 @@ public class ScriptPlugin implements Plugin {
     }
 
     @Override
+    public void saveDefaultConfig() {
+        if (configFile != null && !configFile.exists()) {
+            YamlConfiguration def = getDefaultConfig();
+            try {
+                if (def != null) def.save(configFile);
+            } catch (IOException e) {
+                log(Level.SEVERE, "Failed to save default configuration file.", e);
+            }
+        }
+    }
+
+    @Override
+    public void saveResource(String resourcePath, boolean replace) {
+        // i have no embedded resources..
+        throw new UnsupportedOperationException("ScriptPlugins do not have embedded resources; not saving resource.");
+    }
+
+    @Override
     public void reloadConfig() {
         config = YamlConfiguration.loadConfiguration(configFile);
         YamlConfiguration defaults = getDefaultConfig();
@@ -198,23 +221,6 @@ public class ScriptPlugin implements Plugin {
     public void onDisable() {
         isEnabled = false;
         tryInvoke("onDisable", false);
-        deregisterListeners();
-    }
-
-    private void deregisterListeners() {
-        PluginManager pm = getServer().getPluginManager();
-        if (!(pm instanceof SimplePluginManager)) return;
-        try {
-            EnumMap<Event.Type, SortedSet<RegisteredListener>> map = (EnumMap<Event.Type, SortedSet<RegisteredListener>>) Utils.getFieldHelper(pm, "listeners");
-            for (SortedSet<RegisteredListener> ssrl : map.values()) {
-                ArrayList<RegisteredListener> toRemove = new ArrayList<RegisteredListener>();
-                for (RegisteredListener rl : ssrl)
-                    if (rl.getPlugin() == this) toRemove.add(rl);
-                ssrl.removeAll(toRemove);
-            }
-        } catch (Throwable t) {
-            log(Level.SEVERE, "Failed to deregister listeners on disable! Please report this with your (Craft)Bukkit version!", t);
-        }
     }
     
     @Override
