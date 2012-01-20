@@ -55,6 +55,7 @@ public class ScriptPlugin implements Plugin {
     private PluginHelper helper;
     private Logger logger;
     private boolean naggable = true;
+    private long[] timings = new long[Event.Type.values().length];
 
     private void log(Level l, String message)
     {
@@ -221,6 +222,36 @@ public class ScriptPlugin implements Plugin {
     public void onDisable() {
         isEnabled = false;
         tryInvoke("onDisable", false);
+    }
+    }
+    
+    public long getTiming(Event.Type type) {
+        return timings[type.ordinal()];
+    }
+
+    public void incTiming(Event.Type type, long delta) {
+        timings[type.ordinal()] += delta;
+    }
+
+    public void resetTimings() {
+        timings = new long[Event.Type.values().length];
+    }
+    
+
+    private void deregisterListeners() {
+        PluginManager pm = getServer().getPluginManager();
+        if (!(pm instanceof SimplePluginManager)) return;
+        try {
+            EnumMap<Event.Type, SortedSet<RegisteredListener>> map = (EnumMap<Event.Type, SortedSet<RegisteredListener>>) Utils.getFieldHelper(pm, "listeners");
+            for (SortedSet<RegisteredListener> ssrl : map.values()) {
+                ArrayList<RegisteredListener> toRemove = new ArrayList<RegisteredListener>();
+                for (RegisteredListener rl : ssrl)
+                    if (rl.getPlugin() == this) toRemove.add(rl);
+                ssrl.removeAll(toRemove);
+            }
+        } catch (Throwable t) {
+            log(Level.SEVERE, "Failed to deregister listeners on disable! Please report this with your (Craft)Bukkit version!", t);
+        }
     }
     
     @Override
