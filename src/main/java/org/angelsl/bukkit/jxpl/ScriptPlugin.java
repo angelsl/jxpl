@@ -223,7 +223,7 @@ public class ScriptPlugin implements Plugin {
         isEnabled = false;
         tryInvoke("onDisable", false);
     }
-    }
+
     
     public long getTiming(Event.Type type) {
         return timings[type.ordinal()];
