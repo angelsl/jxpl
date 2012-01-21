@@ -15,8 +15,7 @@ Examples are in the [jxpl-scripts repository](https://github.com/angelsl/jxpl-sc
 You will need to download the jar for the language you want to run a script in.
 
 * __JavaScript__
-  * Mozilla Rhino 1.6R2, included with Java 6
-  * [Mozilla Rhino 1.7R3](http://www.mozilla.org/rhino/download.html)  
+  * Mozilla Rhino 1.7R3, bundled with jxpl
 * __[Python 2.5 (Jython)](http://www.jython.org/downloads.html)__
   * You'll need to download the installer, run it and create a standalone jar.
 * __[Ruby 1.9 (JRuby)](http://www.jruby.org/download)__
