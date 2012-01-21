@@ -24,6 +24,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.*;
@@ -319,6 +321,12 @@ public class ScriptPlugin implements Plugin {
                 ScriptPlugin.this.tryInvoke(callback, false, type, args);
             }
         }
+        
+        public void onEvent(Event args) {
+            if (ScriptPlugin.this.isEnabled) {
+                ScriptPlugin.this.tryInvoke(callback, false, args);
+            }
+        }
     }
 
     public class PluginHelper {
@@ -330,8 +338,25 @@ public class ScriptPlugin implements Plugin {
          * @param functionName The name of the function that will handle the event
          */
         @SuppressWarnings("unused")
+        @Deprecated
         public void registerEvent(Event.Type event, Event.Priority priority, String functionName) {
             ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(functionName), priority, ScriptPlugin.this);
+        }
+
+        /**
+         * Register an event, specifying the function that should handle the event
+         *
+         * @param event        The type of the event that will trigger the function
+         * @param priority     The priority of the event handler
+         * @param functionName The name of the function that will handle the event
+         */
+        @SuppressWarnings("unused")
+        public void registerEvent(Class<? extends Event> event, EventPriority priority, String functionName) {
+            ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(functionName), priority, new EventExecutor() {
+                public void execute(Listener listener, Event event) {
+                    ((ScriptPlugin.ScriptEventListener) listener).onEvent(event);
+                }
+            }, ScriptPlugin.this);
         }
 
         /**
