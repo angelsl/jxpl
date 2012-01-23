@@ -57,7 +57,6 @@ public class ScriptPlugin implements Plugin {
     private PluginHelper helper;
     private Logger logger;
     private boolean naggable = true;
-    private long[] timings = new long[Event.Type.values().length];
 
     private void log(Level l, String message)
     {
@@ -226,19 +225,6 @@ public class ScriptPlugin implements Plugin {
         tryInvoke("onDisable", false);
     }
 
-    
-    public long getTiming(Event.Type type) {
-        return timings[type.ordinal()];
-    }
-
-    public void incTiming(Event.Type type, long delta) {
-        timings[type.ordinal()] += delta;
-    }
-
-    public void resetTimings() {
-        timings = new long[Event.Type.values().length];
-    }
-    
 
     private void deregisterListeners() {
         PluginManager pm = getServer().getPluginManager();
