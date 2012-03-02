@@ -29,7 +29,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.*;
-import org.bukkit.util.config.Configuration;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -42,7 +41,7 @@ import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ScriptPlugin implements Plugin {
+public class ScriptPlugin extends PluginBase {
 
     private boolean isEnabled = false;
     private final PluginLoader loader;
@@ -144,12 +143,6 @@ public class ScriptPlugin implements Plugin {
         return description;
     }
 
-    @Deprecated
-    @Override
-    public Configuration getConfiguration() {
-        return null;
-    }
-
     @Override
     public FileConfiguration getConfig() {
         if (config == null) {
@@ -224,23 +217,6 @@ public class ScriptPlugin implements Plugin {
         isEnabled = false;
         tryInvoke("onDisable", false);
     }
-
-
-    private void deregisterListeners() {
-        PluginManager pm = getServer().getPluginManager();
-        if (!(pm instanceof SimplePluginManager)) return;
-        try {
-            EnumMap<Event.Type, SortedSet<RegisteredListener>> map = (EnumMap<Event.Type, SortedSet<RegisteredListener>>) Utils.getFieldHelper(pm, "listeners");
-            for (SortedSet<RegisteredListener> ssrl : map.values()) {
-                ArrayList<RegisteredListener> toRemove = new ArrayList<RegisteredListener>();
-                for (RegisteredListener rl : ssrl)
-                    if (rl.getPlugin() == this) toRemove.add(rl);
-                ssrl.removeAll(toRemove);
-            }
-        } catch (Throwable t) {
-            log(Level.SEVERE, "Failed to deregister listeners on disable! Please report this with your (Craft)Bukkit version!", t);
-        }
-    }
     
     @Override
     public void onLoad() {
@@ -302,12 +278,6 @@ public class ScriptPlugin implements Plugin {
             callback = fn;
         }
         
-        public void onEvent(Event.Type type, Event args) {
-            if (ScriptPlugin.this.isEnabled) {
-                ScriptPlugin.this.tryInvoke(callback, false, type, args);
-            }
-        }
-        
         public void onEvent(Event args) {
             if (ScriptPlugin.this.isEnabled) {
                 ScriptPlugin.this.tryInvoke(callback, false, args);
@@ -316,18 +286,6 @@ public class ScriptPlugin implements Plugin {
     }
 
     public class PluginHelper {
-        /**
-         * Register an event, specifying the function that should handle the event
-         *
-         * @param event        The type of the event that will trigger the function
-         * @param priority     The priority of the event handler
-         * @param functionName The name of the function that will handle the event
-         */
-        @SuppressWarnings("unused")
-        @Deprecated
-        public void registerEvent(Event.Type event, Event.Priority priority, String functionName) {
-            ScriptPlugin.this.server.getPluginManager().registerEvent(event, new ScriptEventListener(functionName), priority, ScriptPlugin.this);
-        }
 
         /**
          * Register an event, specifying the function that should handle the event

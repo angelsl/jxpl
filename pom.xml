@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.angelsl</groupId>
     <artifactId>jxpl</artifactId>
-    <version>r14</version>
+    <version>r15</version>
     <name>jxpl</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,8 +18,8 @@
     </scm>
     <repositories>
         <repository>
-            <id>bukkit_repos</id>
-            <url>http://repo.bukkit.org/content/groups/repo</url>
+            <id>repobo-rel</id>
+            <url>http://repo.bukkit.org/content/repositories/public/</url>
         </repository>
     </repositories>
     <build>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.1-R1-SNAPSHOT</version>
+            <version>1.1-R6</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>

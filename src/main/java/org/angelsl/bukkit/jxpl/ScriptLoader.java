@@ -127,7 +127,7 @@ public class ScriptLoader implements PluginLoader {
         return loadPlugin(file);
     }
 
-    public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException {
+    public Plugin loadPlugin(File file) throws InvalidPluginException {
         try {
             if (!file.getParentFile().equals(JxplPlugin.getScriptsDir())) {
                 Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; script not in scripts directory.", file.getName()));
@@ -140,16 +140,40 @@ public class ScriptLoader implements PluginLoader {
             return sp;
         } catch (IllegalArgumentException iae) {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF undefined.", file.getName()), iae);
-            throw new InvalidDescriptionException(iae, "SCRIPT_PDF undefined");
+            throw new InvalidPluginException(new InvalidDescriptionException(iae, "SCRIPT_PDF undefined"));
         } catch (ClassCastException cce) {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; SCRIPT_PDF not of type Map<String, Object>.", file.getName()), cce);
-            throw new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>");
+            throw new InvalidPluginException(new InvalidDescriptionException(cce, "SCRIPT_PDF not of type Map<String, Object>"));
+        } catch (InvalidDescriptionException idex) {
+            Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; could not get plugin description.", file.getName()), idex);
+            throw new InvalidPluginException(new InvalidDescriptionException(idex, "Could not get plugin description."));
         } catch (FileNotFoundException fnfe) {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; file not found.", file.getName()), fnfe);
             throw new InvalidPluginException(fnfe);
         } catch (ScriptException se) {
             Utils.log(Level.SEVERE, String.format("Not loading script \"%s\"; error while parsing script.", file.getName()), se);
             throw new InvalidPluginException(se);
+        }
+    }
+
+    @Override
+    public PluginDescriptionFile getPluginDescription(File file) throws InvalidDescriptionException {
+        try {
+            ScriptEngine se = getScriptEngine(file);
+            Map<String, Object> rdescription = (Map<String, Object>) Utils.getOrExcept(se, "SCRIPT_PDF");
+            return Utils.getPdfFromMap(rdescription);
+        } catch(FileNotFoundException fnfex) {
+            Utils.log(Level.SEVERE, String.format("Cannot get plugin description for given file \"%s\"; file not found.", file.getName()), fnfex);
+            throw new InvalidDescriptionException(fnfex);
+        } catch(ScriptException sex) {
+            Utils.log(Level.SEVERE, String.format("Cannot get plugin description for given file \"%s\"; error while parsing script.", file.getName()), sex);
+            throw new InvalidDescriptionException(sex);
+        } catch(InvalidPluginException ipex) {
+            Utils.log(Level.SEVERE, String.format("Cannot get plugin description for given file \"%s\"; invalid plugin.", file.getName()), ipex);
+            throw new InvalidDescriptionException(ipex);
+        } catch(IllegalArgumentException iae) {
+            Utils.log(Level.SEVERE, String.format("Cannot get plugin description for given file \"%s\"; SCRIPT_PDF undefined.", file.getName()), iae);
+            throw new InvalidDescriptionException(iae, "SCRIPT_PDF undefined");
         }
     }
 
@@ -180,14 +204,6 @@ public class ScriptLoader implements PluginLoader {
 
     public Pattern[] getPluginFileFilters() {
         return factoryAssociation.keySet().toArray(new Pattern[0]);
-    }
-
-    public EventExecutor createExecutor(final Event.Type type, Listener listener) {
-        return new EventExecutor() {
-            public void execute(Listener listener, Event event) {
-                ((ScriptPlugin.ScriptEventListener) listener).onEvent(type, event);
-            }
-        };
     }
 
     @Override
