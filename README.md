@@ -8,7 +8,7 @@ Place scripts in the scripts/ directory in the root directory (where plugins/ is
 
 ## Developer Usage
 
-Examples are in the [jxpl-scripts repository](https://github.com/angelsl/jxpl-scripts).  It should contain everything you need to get started. jxpl comes with the latest version of Rhino shaded in the jar. Should you want to script using other languages (provided they work with ScriptEngineManager in javax.script), you will need to include the framework in your classpath yourself.
+Examples are in the [jxpl-scripts repository](https://github.com/angelsl/mc-jxpl-scripts).  It should contain everything you need to get started. jxpl comes with the latest version of Rhino shaded in the jar. Should you want to script using other languages (provided they work with ScriptEngineManager in javax.script), you will need to include the framework in your classpath yourself.
 
 ## Some available languages
 
