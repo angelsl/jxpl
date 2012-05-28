@@ -12,9 +12,9 @@
     </properties>
     <url>http://dev.bukkit.org/server-mods/jxpl/</url>
     <scm>
-        <developerConnection>scm:git:git@github.com:angelsl/jxpl.git</developerConnection>
-        <connection>scm:git:git://github.com/angelsl/jxpl.git</connection>
-        <url>https://github.com/angelsl/jxpl</url>
+        <developerConnection>scm:git:git@github.com:angelsl/mc-jxpl.git</developerConnection>
+        <connection>scm:git:git://github.com/angelsl/mc-jxpl.git</connection>
+        <url>https://github.com/angelsl/mc-jxpl</url>
     </scm>
     <repositories>
         <repository>
