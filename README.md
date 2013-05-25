@@ -1,4 +1,4 @@
-# jxpl - The __j__ava__x__.scripting __P__lugin __L__oader
+# jxpl - The <i>j</i>ava<i>x</i>.scripting <i>P</i>lugin <i>L</i>oader
 
 jxpl is a plugin providing a plugin loader that loads whatever script engines work with javax.script, and are Invocable.
 
